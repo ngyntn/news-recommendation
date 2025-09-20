@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import NewsDetail from "./pages/NewsDetail";
 import ScrollToTop from "./components/ScrollToTop";
 import Login from "./pages/Login";
+import SearchResult from "./pages/SearchResult";
 
 function LayoutWithNavbar() {
   return (
@@ -22,6 +23,7 @@ function App() {
         {/* Route có navbar */}
         <Route element={<LayoutWithNavbar />}>
           <Route index element={<Home />} />
+          <Route path="/search/:query" element={<SearchResult />} />
         </Route>
 
         {/* Route không có navbar */}
