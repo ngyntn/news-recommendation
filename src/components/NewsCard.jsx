@@ -4,6 +4,7 @@ import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { convertDateTimeToVietnam, convertLikeNumber } from "../utils/convert";
 
 const NewsCard = ({ item }) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -31,17 +32,16 @@ const NewsCard = ({ item }) => {
         }
     };
 
-    const convertLikeNumber = (likeCount) => {
-        if (likeCount < 1000) return likeCount.toString();
-        if (likeCount < 1_000_000) return (likeCount / 1000).toFixed(1).replace(/\.0$/, '') + "K";
-        return (likeCount / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + "B";
-    };
 
     const handleOnClickTitle = (newsId) => {
         navigate(`/news/${newsId}`);
     };
 
     const sanitizedContent = DOMPurify.sanitize(item.content);
+
+    useEffect(() => {
+        console.log("Action likeCount: ", likeCount);
+    }, [likeCount]);
 
     return (
         <div className="bg-white border px-10 py-6 m-4 rounded-xl shadow-sm max-w-5xl w-full font-geist">
@@ -52,7 +52,7 @@ const NewsCard = ({ item }) => {
                         onClick={() => handleOnClickTitle(item.newsId)}
                     >{item.title}</h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        {item.createdBy} • {item.date}
+                        {item.owner} • {convertDateTimeToVietnam(item.createdAt)}
                     </p>
                 </div>
                 <div className="flex items-center space-x-2 px-2">

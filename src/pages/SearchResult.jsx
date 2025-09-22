@@ -1,14 +1,24 @@
 import { useParams } from "react-router-dom";
 import { news } from "./Home";
 import SearchResultItem from "../components/SearchResultItem"; 
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchNewsByKeySearch } from "../api/api";
+import { resetSearchResult } from "../store/NewsSlice";
+import Loader from "../components/Loader";
 
 const SearchResult = () => {
     const { query } = useParams();
+    const dispatch = useDispatch();
+    const { searchedItems, searchedLoading, searchedError } = useSelector(state => state.news);
 
-    const filteredNews = news.filter(item =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.content.toLowerCase().includes(query.toLowerCase())
-    );
+    useEffect(() => {
+        dispatch(fetchNewsByKeySearch({ keySearch: query, page: 1, limit: 10}));
+        return () => {
+            // Cleanup if necessary
+            dispatch(resetSearchResult());
+        }
+    }, [query]);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-24 pb-12">
@@ -16,17 +26,21 @@ const SearchResult = () => {
                 <h1 className="text-2xl font-bold mb-6 text-gray-900">
                     Kết quả tìm kiếm cho: "{query}"
                 </h1>
-                {filteredNews.length > 0 ? (
+                {searchedItems.length > 0 && !searchedLoading && (
                     <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
-                        {filteredNews.map((item) => (
+                        {searchedItems.map((item) => (
                             <SearchResultItem key={item.newsId} item={item} />
                         ))}
                     </div>
-                ) : (
+                )}
+                {searchedLoading && (
+                    <Loader isLoading={searchedLoading} />
+                )}
+                { searchedError &&
                     <div className="text-center py-16">
                         <p className="text-gray-600">Không tìm thấy bài viết nào phù hợp.</p>
                     </div>
-                )}
+                }
             </div>
         </div>
     );

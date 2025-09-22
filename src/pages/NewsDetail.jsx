@@ -1,20 +1,38 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { news } from "./Home";
 import { ArrowLeft, AlertCircle, Heart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDetailNews } from "../api/api";
+import { convertDateTimeToVietnam } from "../utils/convert";
+import { resetNewsDetail } from "../store/NewsSlice";
+import Loader from "../components/Loader";
 
 function NewsDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     // Giả sử chưa có dữ liệu
     // const newsDetail = null;
     const newsDetail = news.find(item => item.newsId === id);
+    const { item, itemLoading, itemError } = useSelector(state => state.news);
 
-    const sanitizedContent = newsDetail ? DOMPurify.sanitize(newsDetail.content) : null;
+    useEffect(() => {
+        if (id) {
+            dispatch(fetchDetailNews({ id }));
+        }
+
+        // cleanup redux item
+        return () => {
+            dispatch(resetNewsDetail());
+        }
+    }, [id]);
+
+    const sanitizedContent = item ? DOMPurify.sanitize(item.content) : null;
 
     return (
         <div className="min-h-screen px-4 font-geist">
@@ -28,8 +46,13 @@ function NewsDetail() {
                     Quay lại
                 </button>
             </div>
+
+            {
+                itemLoading && <Loader isLoading={itemLoading}></Loader>
+            }
+
             {/* Trường hợp không có dữ liệu */}
-            {!newsDetail && (
+            {!item && !itemLoading && (
                 <div className="bg-white p-8">
                     <div className="flex flex-col items-center text-gray-600">
                         <h2 className="text-xl font-semibold mb-2">
@@ -42,16 +65,16 @@ function NewsDetail() {
                 </div>
             )}
             {/* Trường hợp có dữ liệu */}
-            {newsDetail && (
+            {item && (
                 <div className="min-w-[100vh] flex justify-center">
                     <div className="px-8 max-w-4xl w-full">
                         <div className="flex justify-between items-start">
                             <div>
                                 <h2
                                     className="text-4xl font-bold mb-1 hover:cursor-pointer hover:underline font-geist"
-                                >{newsDetail.title}</h2>
+                                >{item.title}</h2>
                                 <p className="text-md text-gray-500 mb-4 mt-4">
-                                    {newsDetail.createdBy} • {newsDetail.date}
+                                    {item.owner} • {convertDateTimeToVietnam(item.createdAt)}
                                 </p>
                             </div>
                         </div>

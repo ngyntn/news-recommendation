@@ -2,9 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
-import { Heart  } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NewsCard from "../components/NewsCard";
+import { use } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchRecommendedNews } from "../api/api";
+import Loader from "../components/Loader";
+import { resetHomeNews } from "../store/NewsSlice";
 
 export const news = [
     {
@@ -275,13 +280,31 @@ HealthSync has big plans for the future, including:
 ];
 
 const Home = () => {
+
+
+    // gia lap fetch data tu api
+
+    const [data, setData] = useState(null);
+    const { items, loading, error } = useSelector((state) => state.news);
+    const dispatch = useDispatch();
+
+
+    useEffect(() => {
+        // Bắt đầu gọi API lấy danh sách news khi website được load
+        if (!items || items.length === 0) {
+            dispatch(fetchRecommendedNews({ limit: 20 }));
+        } 
+    }, [dispatch]);
+
     return (
+
         <div className="min-h-screen flex flex-col items-center py-3">
-            <div className="min-h-screen flex flex-col items-center py-20">
-                {news.map((item, index) => (
+            {<div className="min-h-screen flex flex-col items-center py-20">
+                {items.map((item, index) => (
                     <NewsCard key={index} item={item} />
                 ))}
-            </div>
+            </div>}
+            {loading && <Loader isLoading={loading} />}
         </div>
     );
 };

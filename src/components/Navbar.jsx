@@ -6,11 +6,11 @@ function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    useEffect(() => {
-        if (query.trim() === "" && location.pathname.startsWith('/search')) {
-            navigate("/");
-        }
-    }, [query, navigate, location.pathname]);
+    // useEffect(() => {
+    //     if (query.trim() === "" && location.pathname.startsWith('/search')) {
+    //         navigate("/");
+    //     }
+    // }, [query, navigate, location.pathname]);
 
     const handleSearch = () => {
         if (query.trim() !== "") {

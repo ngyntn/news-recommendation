@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
+import { convertDateTimeToVietnam, convertLikeNumber } from '../utils/convert';
 
 const SearchResultItem = ({ item }) => {
     const navigate = useNavigate();
@@ -31,12 +32,6 @@ const SearchResultItem = ({ item }) => {
         }
     };
 
-    const convertLikeNumber = (num) => {
-        if (num < 1000) return num.toString();
-        if (num < 1_000_000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + "K";
-        return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + "B";
-    };
-
     const snippet = createSnippet(item.content);
 
     return (
@@ -47,9 +42,9 @@ const SearchResultItem = ({ item }) => {
             <h2 className="text-xl font-bold mb-2 text-gray-800 hover:underline">{item.title}</h2>
             <p className="text-gray-600 mb-4 leading-relaxed">{snippet}</p>
             <div className="flex items-center text-sm text-gray-500">
-                <span>{item.createdBy}</span>
+                <span>{item.owner}</span>
                 <span className="mx-2">•</span>
-                <span>{item.date}</span>
+                <span>{convertDateTimeToVietnam(item.createdAt)}</span>
                 <span className="mx-2">•</span>
                 <div className="flex items-center space-x-1">
                     <button
