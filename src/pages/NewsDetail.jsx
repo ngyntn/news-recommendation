@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { news } from "./Home";
+// import { news } from "./Home";
 import { ArrowLeft, AlertCircle, Heart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
@@ -18,7 +18,7 @@ function NewsDetail() {
 
     // Giả sử chưa có dữ liệu
     // const newsDetail = null;
-    const newsDetail = news.find(item => item.newsId === id);
+    // const newsDetail = news.find(item => item.newsId === id);
     const { item, itemLoading, itemError } = useSelector(state => state.news);
 
     useEffect(() => {
@@ -36,7 +36,7 @@ function NewsDetail() {
 
     return (
         <div className="min-h-screen px-4 font-geist">
-            <div className="w-full max-w-2xl text-center pt-8 px-20">
+            <div className="w-full max-w-2xl text-center pt-8 px-4 sm:px-6 lg:px-8">
                 {/* Nút quay lại */}
                 <button
                     onClick={() => navigate(-1)}
@@ -66,27 +66,27 @@ function NewsDetail() {
             )}
             {/* Trường hợp có dữ liệu */}
             {item && (
-                <div className="min-w-[100vh] flex justify-center">
-                    <div className="px-8 max-w-4xl w-full">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h2
-                                    className="text-4xl font-bold mb-1 hover:cursor-pointer hover:underline font-geist"
-                                >{item.title}</h2>
-                                <p className="text-md text-gray-500 mb-4 mt-4">
-                                    {item.owner} • {convertDateTimeToVietnam(item.createdAt)}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-[17px] mt-2 mb-[400px] font-geist text-gray-800 leading-relaxed [&>p]:mb-4">
-                            <ReactMarkdown
-                                rehypePlugins={[rehypeRaw]}
-                            >
-                                {sanitizedContent}
-                            </ReactMarkdown>
+                <div className="flex justify-center">
+                <div className="px-4 sm:px-6 lg:px-8 max-w-4xl w-full">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h2
+                                className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 hover:cursor-pointer hover:underline font-geist"
+                            >{item.title}</h2>
+                            <p className="text-sm sm:text-md text-gray-500 mb-4 mt-4">
+                                {item.owner} • {convertDateTimeToVietnam(item.createdAt)}
+                            </p>
                         </div>
                     </div>
+                    <div className="text-base sm:text-lg mt-2 mb-20 sm:mb-[200px] lg:mb-[400px] font-geist text-gray-800 leading-relaxed [&>p]:mb-4">
+                        <ReactMarkdown
+                            rehypePlugins={[rehypeRaw]}
+                        >
+                            {sanitizedContent}
+                        </ReactMarkdown>
+                    </div>
                 </div>
+            </div>
             )}
         </div>
     );

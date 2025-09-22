@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { news } from "./Home";
+// import { news } from "./Home";
 import SearchResultItem from "../components/SearchResultItem"; 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";

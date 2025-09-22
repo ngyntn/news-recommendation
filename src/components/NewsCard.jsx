@@ -6,10 +6,10 @@ import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { convertDateTimeToVietnam, convertLikeNumber } from "../utils/convert";
 
-const NewsCard = ({ item }) => {
+const NewsCard = ({ newsId, title, owner, createdAt, content, likeCount: initialLikeCount }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
-    const [likeCount, setLikeCount] = useState(item.likeCount || 0);
+    const [likeCount, setLikeCount] = useState(initialLikeCount || 0);
     const [userReaction, setUserReaction] = useState(null);
     const contentRef = useRef(null);
     const navigate = useNavigate();
@@ -20,7 +20,7 @@ const NewsCard = ({ item }) => {
                 contentRef.current.scrollHeight > contentRef.current.clientHeight
             );
         }
-    }, []);
+    }, [content]);
 
     const handleLike = () => {
         if (userReaction === "like") {
@@ -32,35 +32,33 @@ const NewsCard = ({ item }) => {
         }
     };
 
-
-    const handleOnClickTitle = (newsId) => {
-        navigate(`/news/${newsId}`);
+    const handleOnClickTitle = (id) => {
+        navigate(`/news/${id}`);
     };
 
-    const sanitizedContent = DOMPurify.sanitize(item.content);
-
-    useEffect(() => {
-        console.log("Action likeCount: ", likeCount);
-    }, [likeCount]);
+    const sanitizedContent = DOMPurify.sanitize(content);
 
     return (
-        <div className="bg-white border px-10 py-6 m-4 rounded-xl shadow-sm max-w-5xl w-full font-geist">
+        // THAY ĐỔI Ở ĐÂY: Thêm `mx-auto` để căn giữa thẻ
+        <div className="bg-white border px-6 sm:px-10 py-6 m-4 rounded-xl shadow-sm max-w-5xl w-full font-geist mx-auto">
             <div className="flex justify-between items-start">
                 <div>
                     <h2
                         className="text-xl font-bold mb-1 hover:cursor-pointer hover:underline"
-                        onClick={() => handleOnClickTitle(item.newsId)}
-                    >{item.title}</h2>
+                        onClick={() => handleOnClickTitle(newsId)}
+                    >
+                        {title}
+                    </h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        {item.owner} • {convertDateTimeToVietnam(item.createdAt)}
+                        {owner} • {convertDateTimeToVietnam(createdAt)}
                     </p>
                 </div>
                 <div className="flex items-center space-x-2 px-2">
                     <button
                         onClick={handleLike}
-                        className={`text-sm font-medium ${userReaction === "like" ? "text-red-600" : "text-gray-600"
-                            } hover:text-red-600 transition-colors`}
-                        title="Like">
+                        className={`text-sm font-medium ${userReaction === "like" ? "text-red-600" : "text-gray-600"} hover:text-red-600 transition-colors`}
+                        title="Like"
+                    >
                         <Heart
                             className="w-5 h-5"
                             fill={userReaction === "like" ? "currentColor" : "none"}
@@ -72,8 +70,7 @@ const NewsCard = ({ item }) => {
 
             <div
                 ref={contentRef}
-                className={`relative transition-all duration-300 prose prose-sm max-w-none leading-relaxed [&>p]:mb-4 ${isExpanded ? "max-h-none" : "max-h-[60vh] overflow-hidden"
-                    }`}
+                className={`relative transition-all duration-300 prose prose-sm max-w-none leading-relaxed [&>p]:mb-4 ${isExpanded ? "max-h-none" : "max-h-60 overflow-hidden"}`}
             >
                 <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                     {sanitizedContent}
@@ -87,7 +84,7 @@ const NewsCard = ({ item }) => {
             {isOverflowing && (
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-3 text-sm font-semibold text-indigo-800 hover:"
+                    className="mt-3 text-sm font-semibold text-indigo-800 hover:underline"
                 >
                     {isExpanded ? "Thu gọn" : "Đọc thêm"}
                 </button>

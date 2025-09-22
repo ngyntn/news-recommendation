@@ -9,6 +9,8 @@ const newsSlice = createSlice({
         items: [],
         loading: false,
         error: null,
+        page: 1,
+        hasMore: true,
 
         item: null,
         itemLoading: false,
@@ -23,6 +25,8 @@ const newsSlice = createSlice({
             state.items = [];
             state.loading = false;
             state.error = null;
+            state.page = 1;
+            state.hasMore = true;
         },
         resetNewsDetail: (state) => {
             state.item = null;
@@ -44,12 +48,19 @@ const newsSlice = createSlice({
             })
             .addCase(fetchRecommendedNews.fulfilled, (state, action) => {
                 state.loading = false;
-                state.items = action.payload;
+                state.items = [...state.items, ...action.payload];
+
+                // Kiểm tra xem có còn dữ liệu để tải không
+                if (action.payload.length === 0) {
+                    state.hasMore = false;
+                }
+                
+                state.page += 1; // Tăng số trang lên
 
                 // Chuyển đổi likeCount từ chuỗi sang số nguyên
                 state.items = state.items.map(item => ({
                     ...item,
-                    likeCount: Number(item.likeCount)  // hoặc parseInt(item.likeCount, 10)
+                    likeCount: Number(item.likeCount)
                 }));
 
                 console.log("NewsSlice.js: Received news", action.payload);
