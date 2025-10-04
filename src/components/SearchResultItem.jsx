@@ -18,7 +18,7 @@ const SearchResultItem = ({ item }) => {
     };
 
     const handleNavigate = () => {
-        navigate(`/news/${item.newsId}`);
+        navigate(`/news/${item.id}`);
     };
 
     const handleLike = (e) => {
@@ -36,20 +36,20 @@ const SearchResultItem = ({ item }) => {
 
     return (
         <div
-            className="bg-white border-b last:border-b-0 py-6 px-6 w-full max-w-4xl hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+            className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 last:border-b-0 py-6 px-6 w-full max-w-4xl hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-200"
             onClick={handleNavigate}
         >
-            <h2 className="text-xl font-bold mb-2 text-gray-800 hover:underline">{item.title}</h2>
-            <p className="text-gray-600 mb-4 leading-relaxed">{snippet}</p>
-            <div className="flex items-center text-sm text-gray-500">
-                <span>{item.owner}</span>
+            <h2 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100 hover:underline">{item.title}</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{snippet}</p>
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                <span>{author?.name || 'Tác giả ẩn danh'}</span>
                 <span className="mx-2">•</span>
-                <span>{convertDateTimeToVietnam(item.createdAt)}</span>
+                <span>{convertDateTimeToVietnam(item.publishedAt)}</span>
                 <span className="mx-2">•</span>
                 <div className="flex items-center space-x-1">
                     <button
                         onClick={handleLike}
-                        className={`transition-colors ${userReaction === 'like' ? 'text-red-600' : 'text-gray-500'} hover:text-red-600`}
+                        className={`transition-colors ${userReaction === 'like' ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'} hover:text-red-500`}
                         aria-label="Like this article"
                     >
                         <Heart

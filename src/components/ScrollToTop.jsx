@@ -5,7 +5,6 @@ export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // chỉ scroll về đầu nếu không phải là Home
     if (pathname !== "/") {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }

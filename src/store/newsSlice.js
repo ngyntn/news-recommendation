@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchDetailNews, fetchNewsByKeySearch, fetchRecommendedNews } from "../api/api";
+import { fetchDetailNews, fetchNewsByKeySearch, fetchRecommendedNews, createNews, updateArticleLike, fetchComments, postComment, fetchRelatedArticles } from "../api/api";
 
 
 
@@ -7,6 +7,7 @@ const newsSlice = createSlice({
     name: "news",
     initialState: {
         items: [],
+        authors: {},
         loading: false,
         error: null,
         page: 1,
@@ -16,9 +17,15 @@ const newsSlice = createSlice({
         itemLoading: false,
         itemError: null,
 
-        searchedItems:[],
+        itemComments: [],
+        itemCommentAuthors: {},
+        relatedItems: [],
+        searchedItems: [],
+        searchedAuthors: {},
         searchedLoading: false,
         searchedError: null,
+
+        createStatus: 'idle',
     },
     reducers: {
         resetHomeNews: (state) => {
@@ -32,6 +39,9 @@ const newsSlice = createSlice({
             state.item = null;
             state.itemLoading = false;
             state.itemError = null;
+            state.itemComments = [];
+            state.itemCommentAuthors = {};
+            state.relatedItems = [];
         },
         resetSearchResult: (state) => {
             state.searchedItems = [];
@@ -44,48 +54,25 @@ const newsSlice = createSlice({
         builder
             .addCase(fetchRecommendedNews.pending, (state) => {
                 state.loading = true;
-                state.error = null;
             })
             .addCase(fetchRecommendedNews.fulfilled, (state, action) => {
+                state.items.push(...action.payload.articles);
+                Object.assign(state.authors, action.payload.authors);
+                state.page += 1;
                 state.loading = false;
-                state.items = [...state.items, ...action.payload];
-
-                // Kiểm tra xem có còn dữ liệu để tải không
-                if (action.payload.length === 0) {
-                    state.hasMore = false;
-                }
-                
-                state.page += 1; // Tăng số trang lên
-
-                // Chuyển đổi likeCount từ chuỗi sang số nguyên
-                state.items = state.items.map(item => ({
-                    ...item,
-                    likeCount: Number(item.likeCount)
-                }));
-
-                console.log("NewsSlice.js: Received news", action.payload);
+                state.hasMore = action.payload.hasMore;
             })
             .addCase(fetchRecommendedNews.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message;
+                state.error = action.payload;
             })
-
-            //
             .addCase(fetchDetailNews.pending, (state) => {
                 state.itemLoading = true;
                 state.itemError = null;
             })
             .addCase(fetchDetailNews.fulfilled, (state, action) => {
                 state.itemLoading = false;
-                state.item = action.payload[0];
-
-                // Chuyển đổi likeCount từ chuỗi sang số nguyên
-                state.item = {
-                    ...state.item,
-                    likeCount: Number(state.item.likeCount)
-                };
-
-                console.log("NewsSlice.js: Received detail news", action.payload);
+                state.item = action.payload;
             })
             .addCase(fetchDetailNews.rejected, (state, action) => {
                 state.itemLoading = false;
@@ -99,20 +86,40 @@ const newsSlice = createSlice({
             })
             .addCase(fetchNewsByKeySearch.fulfilled, (state, action) => {
                 state.searchedLoading = false;
-                state.searchedItems = action.payload;
-
-                // Chuyển đổi likeCount từ chuỗi sang số nguyên
-                state.searchedItems = state.searchedItems.map(item => ({
-                    ...item,
-                    likeCount: Number(item.likeCount)  // hoặc parseInt(item.likeCount, 10)
-                }));
-
-                console.log("NewsSlice.js: Received searched news", action.payload);
+                const { articles, authors } = action.payload;
+                state.searchedItems = articles;
+                state.searchedAuthors = authors;
             })
             .addCase(fetchNewsByKeySearch.rejected, (state, action) => {
                 state.searchedLoading = false;
                 state.searchedError = action.error.message;
                 console.log("NewsSlice.js: Error fetching searched news", action.error.message);
+            })
+            .addCase(createNews.pending, (state) => {
+                state.createStatus = 'loading';
+            })
+            .addCase(createNews.fulfilled, (state, action) => {
+                state.createStatus = 'succeeded';
+                state.items.unshift(action.payload);
+            })
+            .addCase(createNews.rejected, (state) => {
+                state.createStatus = 'failed';
+            })
+            .addCase(updateArticleLike.fulfilled, (state, action) => {
+                if (state.item && state.item.id === action.payload.id) {
+                    state.item.likeCount = action.payload.likeCount;
+                }
+            })
+            .addCase(fetchComments.fulfilled, (state, action) => {
+                state.itemComments = action.payload.comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                state.itemCommentAuthors = action.payload.authors;
+            })
+            .addCase(postComment.fulfilled, (state, action) => {
+                state.itemComments.unshift(action.payload.comment);
+                state.itemCommentAuthors[action.payload.author.id] = action.payload.author;
+            })
+            .addCase(fetchRelatedArticles.fulfilled, (state, action) => {
+                state.relatedItems = action.payload;
             });
     },
 });
