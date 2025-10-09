@@ -33,22 +33,24 @@ function Home() {
     }, [dispatch, items.length]);
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col items-center py-3 transition-colors">
-            <div className="min-h-screen flex flex-col items-center py-20">
-                {items.map((newsItem, index) => {
-                    const author = authors[newsItem.userId];
-                    if (items.length === index + 1) {
-                        return (
-                            <div ref={lastNewsElementRef} key={newsItem.id}>
-                                <NewsCard {...newsItem} author={author} />
-                            </div>
-                        );
-                    } else {
-                        console.log("Rendering news item:", newsItem);
-                        return <NewsCard key={newsItem.id} {...newsItem} author={author} />;
-                    }
-                })}
-            </div>
+        <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col items-center py-8 transition-colors">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">Trang chủ</h1>
+            {items.length > 0 && (
+                 <div className="flex flex-col items-center gap-4">
+                    {items.map((newsItem, index) => {
+                        const author = authors[newsItem.userId];
+                        if (items.length === index + 1) {
+                            return (
+                                <div ref={lastNewsElementRef} key={newsItem.id}>
+                                    <NewsCard {...newsItem} author={author} />
+                                </div>
+                            );
+                        } else {
+                            return <NewsCard key={newsItem.id} {...newsItem} author={author} />;
+                        }
+                    })}
+                 </div>
+            )}
             {loading && <Loader isLoading={loading} />}
             {!hasMore && <p className="text-center text-gray-500 dark:text-gray-400 mt-8">Đã hết tin để xem.</p>}
             {error && <p className="text-center text-red-500 mt-8">Đã có lỗi xảy ra: {error}</p>}

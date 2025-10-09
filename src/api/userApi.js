@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 const USERS_API = import.meta.env.VITE_REACT_APP_USERS_API;
-const ARTICLES_API = import.meta.env.VITE_REACT_APP_GET_RECOMMENDED_NEWS; 
+const ARTICLES_API = import.meta.env.VITE_REACT_APP_ARTICLES_API; 
 
 const CURRENT_USER_ID = '1'; 
 

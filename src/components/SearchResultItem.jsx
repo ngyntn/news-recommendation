@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { convertDateTimeToVietnam, convertLikeNumber } from '../utils/convert';
 
-const SearchResultItem = ({ item }) => {
+const SearchResultItem = ({ item, author }) => {
     const navigate = useNavigate();
     const [likeCount, setLikeCount] = useState(item.likeCount || 0);
     const [userReaction, setUserReaction] = useState(null);
