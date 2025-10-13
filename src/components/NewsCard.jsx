@@ -6,7 +6,7 @@ import { Heart, Bookmark } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom"; 
 import { convertDateTimeToVietnam, convertLikeNumber } from "../utils/convert";
 
-const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialLikeCount }) => {
+const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialLikeCount, tags = [] }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const [likeCount, setLikeCount] = useState(initialLikeCount || 0);
@@ -112,6 +112,16 @@ const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialL
                 >
                     {isExpanded ? "Thu gọn" : "Đọc thêm"}
                 </button>
+            )}
+
+            {tags && tags.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                    {tags.map(tag => (
+                        <span key={tag} className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2.5 py-1 rounded-full">
+                            #{tag}
+                        </span>
+                    ))}
+                </div>
             )}
         </div>
     );

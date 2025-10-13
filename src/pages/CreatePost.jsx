@@ -3,12 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { createNews } from '../api/api';
 import Loader from '../components/Loader';
-import { ImagePlus, Video, X } from 'lucide-react';
+import { ImagePlus, Video, X, Tag } from 'lucide-react';
 
 const CreatePost = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [files, setFiles] = useState([]);
+    const [tags, setTags] = useState([]);
+    const [currentTag, setCurrentTag] = useState(''); 
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { currentUser } = useSelector((state) => state.user);
@@ -29,6 +31,22 @@ const CreatePost = () => {
         setFiles(files.filter(file => file.preview !== fileToRemove.preview));
         URL.revokeObjectURL(fileToRemove.preview); // Giải phóng bộ nhớ
     };
+
+    const handleTagKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const newTag = currentTag.trim();
+            if (newTag && !tags.includes(newTag)) {
+                setTags([...tags, newTag]);
+            }
+            setCurrentTag(''); 
+        }
+    };
+
+    const removeTag = (tagToRemove) => {
+        setTags(tags.filter(tag => tag !== tagToRemove));
+    };
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -111,6 +129,32 @@ const CreatePost = () => {
                                 ))}
                             </div>
                         )}
+                    </div>
+
+                    <div className="mb-6">
+                        <label htmlFor="tags" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Gắn thẻ (tags)
+                        </label>
+                        <div className="flex flex-wrap items-center gap-2 p-2 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                            {tags.map(tag => (
+                                <div key={tag} className="flex items-center gap-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 text-sm font-medium px-2 py-1 rounded">
+                                    <span>{tag}</span>
+                                    <button type="button" onClick={() => removeTag(tag)}>
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                            <input
+                                type="text"
+                                id="tags"
+                                value={currentTag}
+                                onChange={(e) => setCurrentTag(e.target.value)}
+                                onKeyDown={handleTagKeyDown}
+                                placeholder="Thêm tag..."
+                                className="flex-1 bg-transparent focus:outline-none text-gray-900 dark:text-gray-200"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Nhấn Enter hoặc dấu phẩy (,) để thêm một tag.</p>
                     </div>
 
                     <div className="mb-6">

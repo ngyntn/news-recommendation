@@ -32,6 +32,8 @@ function Home() {
         }
     }, [dispatch, items.length]);
 
+    const mockTags = ['công nghệ', 'reactjs', 'frontend'];
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col items-center py-8 transition-colors">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">Trang chủ</h1>
@@ -39,14 +41,15 @@ function Home() {
                  <div className="flex flex-col items-center gap-4">
                     {items.map((newsItem, index) => {
                         const author = authors[newsItem.userId];
+                        const itemWithTags = { ...newsItem, tags: mockTags };
                         if (items.length === index + 1) {
                             return (
                                 <div ref={lastNewsElementRef} key={newsItem.id}>
-                                    <NewsCard {...newsItem} author={author} />
+                                    <NewsCard {...itemWithTags} author={author} />
                                 </div>
                             );
                         } else {
-                            return <NewsCard key={newsItem.id} {...newsItem} author={author} />;
+                            return <NewsCard key={newsItem.id} {...itemWithTags} author={author} />;
                         }
                     })}
                  </div>

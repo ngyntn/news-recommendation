@@ -20,6 +20,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import ContentManagement from "./pages/admin/ContentManagement"; // Import mới
 import ReportManagement from "./pages/admin/ReportManagement";
 import { fetchCurrentUser } from "./api/userApi.js";
+import Notifications from "./pages/Notifications";
 
 function LayoutWithNavbar() {
   return (
@@ -48,7 +49,8 @@ function App() {
             <Route path="/search/:query" element={<SearchResult />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
-            <Route path="/create-post" element={<CreatePost />} />
+                      <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           <Route path="/news/:id" element={<NewsDetail />} />

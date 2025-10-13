@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Home } from "lucide-react";
 import UserMenu from "./UserMenu"; 
+import NotificationBell from "./NotificationBell";
 
 function Navbar() {
     const [query, setQuery] = useState("");
@@ -59,6 +60,7 @@ function Navbar() {
                     <Link to="/" title="Home" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
                         <Home size={24} />
                     </Link>
+                    <NotificationBell />
                     <UserMenu />
                 </div>
 

@@ -39,6 +39,7 @@ function NewsDetail() {
     }, [id, dispatch]);
 
     const sanitizedContent = item ? DOMPurify.sanitize(item.content) : null;
+    const mockTags = item?.tags || ['react', 'webdev', 'javascript']; 
 
     return (
         <div className="min-h-screen px-4 bg-white dark:bg-black font-geist transition-colors">
@@ -86,6 +87,13 @@ function NewsDetail() {
                             >
                                 <Bookmark size={24} fill={isBookmarked ? 'currentColor' : 'none'} />
                             </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            {mockTags.map(tag => (
+                                <span key={tag} className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2.5 py-1 rounded-full">
+                                    #{tag}
+                                </span>
+                            ))}
                         </div>
                         <div className="prose prose-lg dark:prose-invert max-w-none text-gray-800 dark:text-gray-300 leading-relaxed [&>p]:mb-4 mt-2 mb-20 sm:mb-[200px] lg:mb-[400px]">
                             <ReactMarkdown rehypePlugins={[rehypeRaw]}>
