@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 // import { news } from "./Home";
-import { ArrowLeft, AlertCircle, Heart } from "lucide-react";
+import { ArrowLeft, Heart, Bookmark } from "lucide-react"; 
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
 import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 import { fetchDetailNews, fetchComments, fetchRelatedArticles } from "../api/api";
 import LikeInteraction from "../components/LikeInteraction";
 import CommentSection from "../components/CommentSection";
@@ -18,6 +19,8 @@ function NewsDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const [isBookmarked, setIsBookmarked] = useState(false);
 
     const { item, itemLoading } = useSelector(state => state.news);
 
@@ -76,6 +79,13 @@ function NewsDetail() {
                                     {item.author?.name || 'Tác giả ẩn danh'} • {convertDateTimeToVietnam(item.publishedAt)}
                                 </p>
                             </div>
+                            <button
+                                onClick={() => setIsBookmarked(!isBookmarked)}
+                                className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors p-2 mt-2"
+                                title={isBookmarked ? "Bỏ lưu" : "Lưu bài viết"}
+                            >
+                                <Bookmark size={24} fill={isBookmarked ? 'currentColor' : 'none'} />
+                            </button>
                         </div>
                         <div className="prose prose-lg dark:prose-invert max-w-none text-gray-800 dark:text-gray-300 leading-relaxed [&>p]:mb-4 mt-2 mb-20 sm:mb-[200px] lg:mb-[400px]">
                             <ReactMarkdown rehypePlugins={[rehypeRaw]}>

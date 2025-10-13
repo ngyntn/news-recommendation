@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
-import { Heart } from "lucide-react";
+import { Heart, Bookmark } from "lucide-react"; 
 import { Link, useNavigate } from "react-router-dom"; 
 import { convertDateTimeToVietnam, convertLikeNumber } from "../utils/convert";
 
@@ -11,6 +11,7 @@ const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialL
     const [isOverflowing, setIsOverflowing] = useState(false);
     const [likeCount, setLikeCount] = useState(initialLikeCount || 0);
     const [userReaction, setUserReaction] = useState(null);
+    const [isBookmarked, setIsBookmarked] = useState(false);
     const contentRef = useRef(null);
     const navigate = useNavigate();
 
@@ -30,6 +31,11 @@ const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialL
             setLikeCount(likeCount + 1);
             setUserReaction("like");
         }
+    };
+
+    const handleBookmark = (e) => {
+        e.stopPropagation(); // Ngăn sự kiện click lan ra toàn bộ card
+        setIsBookmarked(!isBookmarked);
     };
 
     const handleOnClickTitle = () => {
@@ -62,18 +68,27 @@ const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialL
                         <span className="text-sm text-gray-500">{convertDateTimeToVietnam(publishedAt)}</span>
                     </div>
                 </div>
-                <div className="flex items-center space-x-2 px-2">
+                <div className="flex items-center space-x-4 px-2">
+                    {/* Nút Like */}
+                    <div className="flex items-center space-x-1">
+                        <button
+                            onClick={handleLike}
+                            className={`text-sm font-medium ${userReaction === "like" ? "text-red-500" : "text-gray-600 dark:text-gray-400"} hover:text-red-500 transition-colors`}
+                            title="Thích"
+                        >
+                            <Heart className="w-5 h-5" fill={userReaction === "like" ? "currentColor" : "none"} />
+                        </button>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{convertLikeNumber(likeCount)}</p>
+                    </div>
+
+                    {/* Nút Bookmark MỚI */}
                     <button
-                        onClick={handleLike}
-                        className={`text-sm font-medium ${userReaction === "like" ? "text-red-500" : "text-gray-600 dark:text-gray-400"} hover:text-red-500 transition-colors`}
-                        title="Like"
+                        onClick={handleBookmark}
+                        className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors"
+                        title={isBookmarked ? "Bỏ lưu" : "Lưu bài viết"}
                     >
-                        <Heart
-                            className="w-5 h-5"
-                            fill={userReaction === "like" ? "currentColor" : "none"}
-                        />
+                        <Bookmark className="w-5 h-5" fill={isBookmarked ? "currentColor" : "none"} />
                     </button>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{convertLikeNumber(likeCount)}</p>
                 </div>
             </div>
 
