@@ -56,7 +56,7 @@ export default function CreatePost() {
       toast.success("Tạo bài viết thành công, đang chờ duyệt!");
       navigate(`/news/${newArticle.slug}`);
     } catch (error) {
-      toast.error(error.message || "Tạo bài viết thất bại.");
+      toast.error(error || "Tạo bài viết thất bại.");
     }
   };
 

@@ -81,8 +81,8 @@ api.interceptors.response.use(
                 const response = await axios.post(`${BASE_URL}/auth/refresh-token`, { 
                     refreshToken: refreshToken 
                 });
-                
-                const newAccessToken = response.data.accessToken.accessToken; // Giả sử BE trả về { accessToken: { accessToken: "..." } }
+
+                const newAccessToken = response.data.data.accessToken.accessToken; // Giả sử BE trả về { accessToken: { accessToken: "..." } }
                 localStorage.setItem('accessToken', newAccessToken);
                 api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
                 originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;

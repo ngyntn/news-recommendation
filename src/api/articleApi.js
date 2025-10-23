@@ -24,7 +24,7 @@ export const fetchDetailNews = createAsyncThunk(
         try {
             const response = await api.get(`/articles/${slug}`);
             console.log("DETAIL",response)
-            return response.data.data; // Giả sử BE trả về 1 article
+            return response.data.data; 
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -53,7 +53,9 @@ export const createNews = createAsyncThunk(
             console.log("AAAA",response)
             return response.data.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message);
+            const originalMessage = error.response?.data?.message || error.message;
+            const cleanMessage = originalMessage.replace(/^\[.*?\]: /, '');
+            return rejectWithValue(cleanMessage);
         }
     }
 );
