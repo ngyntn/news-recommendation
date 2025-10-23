@@ -1,63 +1,37 @@
-// src/pages/Home.jsx
+import React from "react";
+import { useSelector, shallowEqual } from "react-redux"; 
+import { fetchRecommendedNews } from "../api/articleApi";
+import { resetHomeNews } from "../store/newsSlice"; 
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll"; 
+import ArticleList from "../components/ArticleList"; 
 
-import React, { useEffect, useCallback, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-// Sửa lại đường dẫn import cho đúng
-import { fetchRecommendedNews } from "../api/api"; 
-import NewsCard from "../components/NewsCard";
-import Loader from "../components/Loader";
-import ScrollToTopButton from "../components/ScrollToTopButton";
+const homeStateSelector = (state) => ({
+    items: state.news.items,
+    loading: state.news.loading,
+    error: state.news.error,
+    page: state.news.page,
+    hasMore: state.news.hasMore,
+});
 
 function Home() {
-    const dispatch = useDispatch();
-    // Lấy thêm `authors` từ state
-    const { items, authors, loading, error, page, hasMore } = useSelector(state => state.news);
+    const listState = useSelector(homeStateSelector, shallowEqual);
 
-    const observer = useRef();
-    const lastNewsElementRef = useCallback(node => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore) {
-                // Sửa lại tham số cho đúng với thunk mới
-                dispatch(fetchRecommendedNews({ page, limit: 10 }));
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [loading, hasMore, page, dispatch]);
-
-    useEffect(() => {
-        if (items.length === 0) {
-            dispatch(fetchRecommendedNews({ page: 1, limit: 10 }));
-        }
-    }, [dispatch, items.length]);
-
-    const mockTags = ['công nghệ', 'reactjs', 'frontend'];
+    const { items, loading, error, hasMore, lastElementRef } = useInfiniteScroll({
+        listState,
+        fetchThunk: fetchRecommendedNews,
+        resetAction: resetHomeNews
+    });
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col items-center py-8 transition-colors">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">Trang chủ</h1>
-            {items.length > 0 && (
-                 <div className="flex flex-col items-center gap-4">
-                    {items.map((newsItem, index) => {
-                        const author = authors[newsItem.userId];
-                        const itemWithTags = { ...newsItem, tags: mockTags };
-                        if (items.length === index + 1) {
-                            return (
-                                <div ref={lastNewsElementRef} key={newsItem.id}>
-                                    <NewsCard {...itemWithTags} author={author} />
-                                </div>
-                            );
-                        } else {
-                            return <NewsCard key={newsItem.id} {...itemWithTags} author={author} />;
-                        }
-                    })}
-                 </div>
-            )}
-            {loading && <Loader isLoading={loading} />}
-            {!hasMore && <p className="text-center text-gray-500 dark:text-gray-400 mt-8">Đã hết tin để xem.</p>}
-            {error && <p className="text-center text-red-500 mt-8">Đã có lỗi xảy ra: {error}</p>}
-            <ScrollToTopButton />
+            <ArticleList
+                items={items}
+                loading={loading}
+                error={error}
+                hasMore={hasMore}
+                lastElementRef={lastElementRef}
+            />
         </div>
     );
 }

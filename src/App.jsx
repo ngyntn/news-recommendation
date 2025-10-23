@@ -1,5 +1,12 @@
-import { useEffect } from "react"; 
-import { BrowserRouter as Router, Route, Routes, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Outlet,
+  Navigate,
+} from "react-router-dom";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
@@ -7,26 +14,60 @@ import NewsDetail from "./pages/NewsDetail";
 import ScrollToTop from "./components/ScrollToTop";
 import Login from "./pages/Login";
 import SearchResult from "./pages/SearchResult";
-import { useDispatch, Provider } from "react-redux";
+import { useDispatch, Provider, useSelector } from "react-redux";
 import store from "./store/store";
 import Profile from "./pages/Profile";
 import Feed from "./pages/Feed";
 import EditProfile from "./pages/EditProfile";
 import CreatePost from "./pages/CreatePost";
-
+import EditPost from "./pages/EditPost";
 import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import UserManagement from "./pages/admin/UserManagement";
-import ContentManagement from "./pages/admin/ContentManagement"; // Import mới
+import ContentManagement from "./pages/admin/ContentManagement";
 import ReportManagement from "./pages/admin/ReportManagement";
-import { fetchCurrentUser } from "./api/userApi.js";
+// import { fetchCurrentUser } from "./api/userApi.js";
+import { loadUserFromStorage } from "./store/userSlice";
 import Notifications from "./pages/Notifications";
+import Loader from "./components/Loader";
+
+const ProtectedLayout = () => {
+  const { currentUser, status } = useSelector((state) => state.user);
+
+  if (status === "loading" || status === "idle") {
+    return <Loader isLoading={true} />;
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+};
+
+const AdminProtectedLayout = () => {
+  const { currentUser, status } = useSelector((state) => state.user);
+
+  if (status === "loading" || status === "idle") {
+    return <Loader isLoading={true} />;
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (currentUser.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+};
 
 function LayoutWithNavbar() {
   return (
     <>
       <Navbar />
-      <div className="pt-16"> 
+      <div className="pt-16">
         <Outlet />
       </div>
     </>
@@ -34,47 +75,56 @@ function LayoutWithNavbar() {
 }
 
 function App() {
-    const dispatch = useDispatch();
-    useEffect(() => {
-        dispatch(fetchCurrentUser());
-      }, [dispatch]);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    // dispatch(fetchCurrentUser());
+    dispatch(loadUserFromStorage());
+  }, [dispatch]);
+
   return (
-    <Provider store={store}>
-      <Router>
-        <ScrollToTop />
-        <Routes>
+    <Router>
+      <ScrollToTop />
+      <Toaster position="top-right" reverseOrder={false} />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        {/* Trang chi tiết bài viết vẫn nên công khai để chia sẻ */}
+        <Route path="/news/:id" element={<NewsDetail />} />
+
+        <Route element={<ProtectedLayout />}>
           <Route element={<LayoutWithNavbar />}>
             <Route index element={<Home />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/search/:query" element={<SearchResult />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
-                      <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/edit/:slug" element={<EditPost />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
+        </Route>
 
-          <Route path="/news/:id" element={<NewsDetail />} />
-                  <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-
-            <Route path="/admin" element={<AdminLayout />}>
+        <Route element={<AdminProtectedLayout />}>
+          <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="content" element={<ContentManagement />} />
             <Route path="reports" element={<ReportManagement />} />
           </Route>
-        </Routes>
-      </Router>
-    </Provider>
+        </Route>
+
+        {/* <Route path="*" element={<div>404 - Không tìm thấy trang</div>} /> */}
+      </Routes>
+    </Router>
   );
 }
 
 function AppWrapper() {
-    return (
-      <Provider store={store}>
-        <App />
-      </Provider>
-    )
-  }
+  return (
+    <Provider store={store}>
+      <App />
+    </Provider>
+  );
+}
 
 export default AppWrapper;

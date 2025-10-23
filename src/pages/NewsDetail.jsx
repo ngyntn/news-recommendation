@@ -1,113 +1,140 @@
 import React, { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 // import { news } from "./Home";
-import { ArrowLeft, Heart, Bookmark } from "lucide-react"; 
+import { ArrowLeft, Heart, Bookmark } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { fetchDetailNews, fetchComments, fetchRelatedArticles } from "../api/api";
+import { fetchDetailNews, fetchRelatedArticles } from "../api/articleApi";
+import { fetchComments } from "../api/commentApi";
 import LikeInteraction from "../components/LikeInteraction";
 import CommentSection from "../components/CommentSection";
 import RelatedArticles from "../components/RelatedArticles";
 import { convertDateTimeToVietnam } from "../utils/convert";
 import { resetNewsDetail } from "../store/newsSlice";
 import Loader from "../components/Loader";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 function NewsDetail() {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+  const { slug } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const [isBookmarked, setIsBookmarked] = useState(false);
+  const {
+    item: article,
+    itemLoading,
+    itemError,
+    deleteStatus, // Lấy trạng thái xóa
+  } = useSelector((state) => state.news);
+  const { user } = useSelector((state) => state.auth); // Lấy user đang đăng nhập
 
-    const { item, itemLoading } = useSelector(state => state.news);
+  useEffect(() => {
+    if (slug) {
+      dispatch(fetchDetailNews(slug));
+    }
+    return () => {
+      dispatch(resetNewsDetail());
+    };
+  }, [dispatch, slug]);
 
-    useEffect(() => {
-        if (id) {
-            dispatch(fetchDetailNews({ id }))
-                .unwrap()
-                .then((article) => {
-                    if (article) {
-                        dispatch(fetchComments({ articleId: article.id }));
-                        dispatch(fetchRelatedArticles({ authorId: article.author?.id, currentArticleId: article.id }));
-                    }
-                });
-        }
-        return () => { dispatch(resetNewsDetail()); }
-    }, [id, dispatch]);
+  // ======================================
+  // === PHẦN THÊM MỚI (U11) ===
+  // ======================================
 
-    const sanitizedContent = item ? DOMPurify.sanitize(item.content) : null;
-    const mockTags = item?.tags || ['react', 'webdev', 'javascript']; 
+  // Kiểm tra xem user hiện tại có phải là tác giả không
+  const isAuthor = user && article && user.id === article.author?.id;
 
-    return (
-        <div className="min-h-screen px-4 bg-white dark:bg-black font-geist transition-colors">
-            <div className="w-full max-w-2xl text-center pt-8 px-4 sm:px-6 lg:px-8">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 px-4 py-1 mb-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400"
-                >
-                    <ArrowLeft size={18} />
-                    Quay lại
-                </button>
-            </div>
+  const handleDelete = async () => {
+    // Sử dụng modal xác nhận của DaisyUI (hoặc window.confirm)
+    // Giả sử bạn có modal với id 'delete_modal'
+    // document.getElementById('delete_modal').showModal();
+    // Hoặc dùng confirm đơn giản:
+    if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
+      try {
+        await dispatch(deleteNews(article.id)).unwrap();
+        toast.success("Xóa bài viết thành công!");
+        navigate("/"); // Chuyển về trang chủ
+      } catch (error) {
+        toast.error(error.message || "Xóa bài viết thất bại.");
+      }
+    }
+  };
+  // ======================================
 
-            { itemLoading && <Loader isLoading={itemLoading}></Loader> }
+  if (itemLoading) return <Loader />;
+  if (itemError)
+    return <div className="text-red-500 text-center">{itemError}</div>;
+  if (!article) return null;
 
-            {!item && !itemLoading && (
-                <div className="bg-white dark:bg-black p-8">
-                    <div className="flex flex-col items-center text-gray-600 dark:text-gray-300">
-                        <h2 className="text-xl font-semibold mb-2">
-                            Bài viết không tồn tại
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            Có thể bài viết đã bị xoá hoặc đường dẫn không đúng.
-                        </p>
-                    </div>
-                </div>
-            )}
-            
-            {item && (
-                <div className="flex justify-center">
-                    <div className="px-4 sm:px-6 lg:px-8 max-w-4xl w-full">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h2
-                                    className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 hover:cursor-pointer hover:underline text-gray-900 dark:text-gray-100"
-                                >{item.title}</h2>
-                                <p className="text-sm sm:text-md text-gray-500 dark:text-gray-400 mb-4 mt-4">
-                                    {item.author?.name || 'Tác giả ẩn danh'} • {convertDateTimeToVietnam(item.publishedAt)}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => setIsBookmarked(!isBookmarked)}
-                                className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors p-2 mt-2"
-                                title={isBookmarked ? "Bỏ lưu" : "Lưu bài viết"}
-                            >
-                                <Bookmark size={24} fill={isBookmarked ? 'currentColor' : 'none'} />
-                            </button>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mb-6">
-                            {mockTags.map(tag => (
-                                <span key={tag} className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2.5 py-1 rounded-full">
-                                    #{tag}
-                                </span>
-                            ))}
-                        </div>
-                        <div className="prose prose-lg dark:prose-invert max-w-none text-gray-800 dark:text-gray-300 leading-relaxed [&>p]:mb-4 mt-2 mb-20 sm:mb-[200px] lg:mb-[400px]">
-                            <ReactMarkdown rehypePlugins={[rehypeRaw]}>
-                                {sanitizedContent}
-                            </ReactMarkdown>
-                        </div>
-                        <LikeInteraction article={item} />
-                        <CommentSection articleId={item.id} />
-                        <RelatedArticles />
-                    </div>
-                </div>
-            )}
+  return (
+    <div className="max-w-4xl mx-auto p-4 dark:text-gray-200">
+      {/* Tiêu đề */}
+      <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+
+      {/* Thông tin tác giả và Nút Sửa/Xóa */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center space-x-3">
+          <img
+            src={
+              article.author?.avatarUrl ||
+              "https://placehold.co/400x400/gray/white?text=User"
+            }
+            alt={article.author?.fullName}
+            className="w-12 h-12 rounded-full object-cover"
+          />
+          <div>
+            <p className="font-semibold">{article.author?.fullName}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {new Date(article.createdAt).toLocaleDateString()}
+            </p>
+          </div>
         </div>
-    );
+
+        {/* NÚT SỬA/XÓA (U11) */}
+        {isAuthor && (
+          <div className="flex space-x-2">
+            <Link
+              to={`/edit/${article.slug}`} // Sửa: Dùng path /edit/
+              className="btn btn-sm btn-ghost btn-circle"
+              aria-label="Sửa bài viết"
+            >
+              <PencilIcon className="w-5 h-5" />
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="btn btn-sm btn-ghost btn-circle text-red-500 hover:bg-red-100 dark:hover:bg-red-900"
+              disabled={deleteStatus === "loading"}
+              aria-label="Xóa bài viết"
+            >
+              {deleteStatus === "loading" ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                <TrashIcon className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Ảnh bìa */}
+      <img
+        src={article.thumbnailUrl}
+        alt={article.title}
+        className="w-full h-auto max-h-[500px] object-cover rounded-lg mb-6"
+      />
+
+      {/* Nội dung bài viết (HTML) */}
+      <div
+        className="prose dark:prose-invert max-w-none"
+        dangerouslySetInnerHTML={{ __html: article.content }}
+      />
+      <LikeInteraction article={item} />
+      <CommentSection articleId={item.id} />
+      <RelatedArticles />
+    </div>
+  );
 }
 
 export default NewsDetail;

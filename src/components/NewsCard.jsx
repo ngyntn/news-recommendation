@@ -6,10 +6,10 @@ import { Heart, Bookmark } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom"; 
 import { convertDateTimeToVietnam, convertLikeNumber } from "../utils/convert";
 
-const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialLikeCount, tags = [] }) => {
+const NewsCard = ({ id, title, author, createdAt, content, likeCount: initialLikeCount, tags = [] }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
-    const [likeCount, setLikeCount] = useState(initialLikeCount || 0);
+    const [likeCount, setLikeCount] = useState(0);
     const [userReaction, setUserReaction] = useState(null);
     const [isBookmarked, setIsBookmarked] = useState(false);
     const contentRef = useRef(null);
@@ -65,7 +65,7 @@ const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialL
                             <span className="text-sm text-gray-600 dark:text-gray-400">Tác giả ẩn danh</span>
                         )}
                         <span className="text-sm text-gray-500 mx-2">•</span>
-                        <span className="text-sm text-gray-500">{convertDateTimeToVietnam(publishedAt)}</span>
+                        <span className="text-sm text-gray-500">{convertDateTimeToVietnam(createdAt)}</span>
                     </div>
                 </div>
                 <div className="flex items-center space-x-4 px-2">
@@ -117,8 +117,8 @@ const NewsCard = ({ id, title, author, publishedAt, content, likeCount: initialL
             {tags && tags.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                     {tags.map(tag => (
-                        <span key={tag} className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2.5 py-1 rounded-full">
-                            #{tag}
+                        <span key={tag.id || tag.name} className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2.5 py-1 rounded-full">
+                            #{tag.name}
                         </span>
                     ))}
                 </div>

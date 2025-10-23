@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { postComment } from '../api/api';
+import { postComment } from '../api/commentApi';
 
 const Comment = ({ comment, author }) => (
     <div className="flex gap-3 py-4">

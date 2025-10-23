@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Heart } from 'lucide-react';
 import { convertLikeNumber } from '../utils/convert';
-import { updateArticleLike } from '../api/api';
+import { updateArticleLike } from '../api/articleApi';
 
 const LikeInteraction = ({ article }) => {
     const dispatch = useDispatch();

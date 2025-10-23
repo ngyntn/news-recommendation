@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserProfile, fetchUserNews, fetchCurrentUser } from '../api/userApi';
+import { fetchUserProfile, fetchCurrentUser } from '../api/userApi';
+import { fetchUserNews } from '../api/articleApi';
 import { resetProfile } from '../store/userSlice';
 import ProfileHeader from '../components/ProfileHeader';
 import NewsCard from '../components/NewsCard';

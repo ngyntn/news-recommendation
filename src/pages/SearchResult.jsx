@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import SearchResultItem from "../components/SearchResultItem"; 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchNewsByKeySearch } from "../api/api";
+import { fetchNewsByKeySearch } from "../api/articleApi";
 import { resetSearchResult } from "../store/newsSlice";
 import Loader from "../components/Loader";
 

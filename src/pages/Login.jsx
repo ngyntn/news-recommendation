@@ -1,12 +1,15 @@
-// src/pages/Login.jsx
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from "../api/authApi";
 
 function Login() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: '', password: '' });
-    const [error, setError] = useState(null);
+
+    const dispatch = useDispatch();
+    const { status, error: reduxError } = useSelector((state) => state.user);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,8 +17,17 @@ function Login() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Logic đăng nhập API sẽ ở đây
-        navigate('/');
+
+        const { email, password } = formData;
+
+        dispatch(loginUser({ email, password }))
+            .unwrap()
+            .then(() => {
+                navigate('/');
+        })
+            .catch((err) => {
+                console.error("Đăng nhập thất bại:", err);
+        });
     };
     
     return (
@@ -36,7 +48,7 @@ function Login() {
                     </p>
 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+                        {/* {error && <p className="text-red-500 text-sm text-center">{error}</p>} */}
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>

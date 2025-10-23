@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -9,27 +9,52 @@
      --txt-color: #64748b;
      --heading: #cbd5e1; */
 
+small {
+  left: calc(50% - 50px);
+}
 
-     small {
-        left: calc(50% - 50px);
-     }
+@layer base {
+  body {
+    @apply bg-gray-50 dark:bg-black transition-colors duration-300;
+  }
+}
 
-     @layer base {
-        body {
-            @apply bg-gray-50 dark:bg-black transition-colors duration-300;
-        }
-      }
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-down {
+  animation: fade-in-down 0.2s ease-out;
+}
 
-      @keyframes fade-in-down {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    .animate-fade-in-down {
-        animation: fade-in-down 0.2s ease-out;
-    }
+.ql-editor .ql-video {
+  @apply w-full aspect-video rounded-lg shadow-md my-4;
+}
+
+
+.prose video,
+.prose iframe {
+  @apply w-full aspect-video rounded-lg shadow-md my-6;
+}
+
+.ql-toolbar {
+  @apply rounded-t-lg border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800;
+}
+.ql-container {
+  @apply rounded-b-lg border-gray-300 dark:border-gray-600;
+}
+.ql-editor {
+  @apply min-h-[300px] bg-white text-gray-900 dark:bg-gray-900 dark:text-white;
+}
+.ql-snow .ql-stroke {
+  @apply stroke-gray-600 dark:stroke-gray-300;
+}
+.ql-snow .ql-picker-label {
+  @apply text-gray-600 dark:text-gray-300;
+}
