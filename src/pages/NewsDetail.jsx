@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-// import { news } from "./Home";
-import { ArrowLeft, Heart, Bookmark } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
@@ -16,6 +15,9 @@ import { convertDateTimeToVietnam } from "../utils/convert";
 import { resetNewsDetail } from "../store/newsSlice";
 import Loader from "../components/Loader";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { deleteNews } from "../api/articleApi";
+import toast from "react-hot-toast";
+import BookmarkInteraction from "../components/BookmarkInteraction";
 
 function NewsDetail() {
   const { slug } = useParams();
@@ -23,12 +25,12 @@ function NewsDetail() {
   const navigate = useNavigate();
 
   const {
-    item: article,
+    item,
     itemLoading,
     itemError,
-    deleteStatus, // Lấy trạng thái xóa
+    deleteStatus,
   } = useSelector((state) => state.news);
-  const { user } = useSelector((state) => state.auth); // Lấy user đang đăng nhập
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     if (slug) {
@@ -39,100 +41,110 @@ function NewsDetail() {
     };
   }, [dispatch, slug]);
 
-  // ======================================
-  // === PHẦN THÊM MỚI (U11) ===
-  // ======================================
-
-  // Kiểm tra xem user hiện tại có phải là tác giả không
-  const isAuthor = user && article && user.id === article.author?.id;
+  const isAuthor = currentUser && item && currentUser.id === item.author?.id;
 
   const handleDelete = async () => {
-    // Sử dụng modal xác nhận của DaisyUI (hoặc window.confirm)
-    // Giả sử bạn có modal với id 'delete_modal'
-    // document.getElementById('delete_modal').showModal();
-    // Hoặc dùng confirm đơn giản:
     if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
       try {
-        await dispatch(deleteNews(article.id)).unwrap();
+        await dispatch(deleteNews(item.id)).unwrap();
         toast.success("Xóa bài viết thành công!");
-        navigate("/"); // Chuyển về trang chủ
+        navigate("/");
       } catch (error) {
         toast.error(error.message || "Xóa bài viết thất bại.");
       }
     }
   };
-  // ======================================
 
   if (itemLoading) return <Loader />;
   if (itemError)
     return <div className="text-red-500 text-center">{itemError}</div>;
-  if (!article) return null;
+  if (!item) return null;
 
   return (
-    <div className="max-w-4xl mx-auto p-4 dark:text-gray-200">
-      {/* Tiêu đề */}
-      <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+    <div className="dark:text-gray-200">
+      <img
+        src={item.thumbnailUrl}
+        alt={item.title}
+        className="w-full h-auto max-h-[350px] md:max-h-[500px] object-cover"
+      />
 
-      {/* Thông tin tác giả và Nút Sửa/Xóa */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center space-x-3">
-          <img
-            src={
-              article.author?.avatarUrl ||
-              "https://placehold.co/400x400/gray/white?text=User"
-            }
-            alt={article.author?.fullName}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-          <div>
-            <p className="font-semibold">{article.author?.fullName}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {new Date(article.createdAt).toLocaleDateString()}
-            </p>
+      <div className="max-w-4xl mx-auto p-4 md:p-6">
+        {/* Nút "Quay lại" - Nâng cấp để chữ cùng hàng với mũi tên */}
+        <button
+          onClick={() => navigate(-1)}
+          className="btn btn-ghost btn-sm mb-4 flex items-center space-x-1" // Thêm flex items-center space-x-1
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Quay lại</span> {/* Bọc chữ trong span để dễ kiểm soát */}
+        </button>
+
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+          {item.title}
+        </h1>
+
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center space-x-3">
+            <img
+              src={
+                item.author?.avatarUrl ||
+                "https://placehold.co/400x400/gray/white?text=User"
+              }
+              alt={item.author?.fullName}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div>
+              <p className="font-semibold">{item.author?.fullName}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {convertDateTimeToVietnam(item.createdAt)}
+              </p>
+            </div>
           </div>
+
+          {isAuthor && (
+            <div className="flex space-x-2">
+              <Link
+                to={`/edit/${item.slug}`}
+                className="btn btn-sm btn-ghost btn-circle hover:bg-base-200 dark:hover:bg-base-700"
+                aria-label="Sửa bài viết"
+              >
+                <PencilIcon className="w-5 h-5" />
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="btn btn-sm btn-ghost btn-circle text-red-500 hover:bg-red-100 dark:hover:bg-red-900"
+                disabled={deleteStatus === "loading"}
+                aria-label="Xóa bài viết"
+              >
+                {deleteStatus === "loading" ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : (
+                  <TrashIcon className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* NÚT SỬA/XÓA (U11) */}
-        {isAuthor && (
-          <div className="flex space-x-2">
-            <Link
-              to={`/edit/${article.slug}`} // Sửa: Dùng path /edit/
-              className="btn btn-sm btn-ghost btn-circle"
-              aria-label="Sửa bài viết"
-            >
-              <PencilIcon className="w-5 h-5" />
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="btn btn-sm btn-ghost btn-circle text-red-500 hover:bg-red-100 dark:hover:bg-red-900"
-              disabled={deleteStatus === "loading"}
-              aria-label="Xóa bài viết"
-            >
-              {deleteStatus === "loading" ? (
-                <span className="loading loading-spinner loading-xs"></span>
-              ) : (
-                <TrashIcon className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-        )}
+        <div
+          className="prose dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: item.content }}
+        />
+
+        {/* Khu vực tương tác Like/Bookmark */}
+        {/* === Nâng cấp: Giảm khoảng cách và kéo dài "border" === */}
+        {/* Xóa divider ở đây và bọc LikeInteraction, BookmarkInteraction trong một div có border/padding */}
+        <div className="flex items-center space-x-6 py-4 border-b border-base-200 dark:border-base-700 mb-4"> {/* border-b và mb-4 */}
+          <LikeInteraction article={item} />
+          <BookmarkInteraction article={item} />
+        </div>
+        {/* Đã bỏ <div className="divider"></div> ở đây */}
+
+        {/* Comment Section - Giảm khoảng cách bằng cách điều chỉnh mb của div trên */}
+        <CommentSection articleId={item.id} />
+
+        <div className="divider"></div>
+        <RelatedArticles />
       </div>
-
-      {/* Ảnh bìa */}
-      <img
-        src={article.thumbnailUrl}
-        alt={article.title}
-        className="w-full h-auto max-h-[500px] object-cover rounded-lg mb-6"
-      />
-
-      {/* Nội dung bài viết (HTML) */}
-      <div
-        className="prose dark:prose-invert max-w-none"
-        dangerouslySetInnerHTML={{ __html: article.content }}
-      />
-      <LikeInteraction article={item} />
-      <CommentSection articleId={item.id} />
-      <RelatedArticles />
     </div>
   );
 }

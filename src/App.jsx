@@ -89,12 +89,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         {/* Trang chi tiết bài viết vẫn nên công khai để chia sẻ */}
-        <Route path="/news/:id" element={<NewsDetail />} />
 
         <Route element={<ProtectedLayout />}>
           <Route element={<LayoutWithNavbar />}>
             <Route index element={<Home />} />
             <Route path="/feed" element={<Feed />} />
+            <Route path="/news/:slug" element={<NewsDetail />} />
             <Route path="/search/:query" element={<SearchResult />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />

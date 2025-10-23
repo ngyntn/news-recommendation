@@ -1,15 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   fetchRecommendedNews,
-  fetchFeedNews,
   fetchDetailNews,
   fetchNewsByKeySearch,
   createNews,
   updateNews,
   deleteNews,
+  fetchFeedNews,
+  updateArticleLike,
+  toggleBookmark,
   fetchRelatedArticles,
 } from "../api/articleApi";
-import { updateArticleLike } from "../api/articleApi";
+
 import { fetchComments, postComment } from "../api/commentApi";
 
 const initialState = {
@@ -139,10 +141,10 @@ const newsSlice = createSlice({
 
           const { pagination } = action.payload;
           if (pagination && typeof pagination.currentPage === "number") {
-            state.feed.page = pagination.currentPage + 1; 
+            state.feed.page = pagination.currentPage + 1;
             state.feed.hasMore = pagination.currentPage < pagination.totalPages;
           } else {
-            state.feed.hasMore = false; 
+            state.feed.hasMore = false;
             console.error(
               "Lỗi: Dữ liệu phân trang không hợp lệ từ API (Feed)",
               action.payload
@@ -231,6 +233,15 @@ const newsSlice = createSlice({
         if (state.item && state.item.id === action.payload.id) {
           state.item.likeCount = action.payload.likeCount;
         }
+      })
+      // Bookmark
+      .addCase(toggleBookmark.fulfilled, (state, action) => {
+        if (state.article) {
+          state.article.isBookmarked = action.payload.isBookmarked;
+        }
+      })
+      .addCase(toggleBookmark.rejected, (state, action) => {
+        console.error("Bookmark failed:", action.payload);
       })
       // Comments
       .addCase(fetchComments.fulfilled, (state, action) => {

@@ -7,7 +7,7 @@ import { updateArticleLike } from '../api/articleApi';
 const LikeInteraction = ({ article }) => {
     const dispatch = useDispatch();
     const [isLiked, setIsLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(article.likeCount || 0);
+    const [likeCount, setLikeCount] = useState(article.likesCount || 0);
 
     const handleLike = () => {
         const newIsLiked = !isLiked;
