@@ -87,11 +87,14 @@ export const useArticleForm = (initialData = {}) => {
   const handleTagKeyDown = (e) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
-      const newTag = currentTag.trim();
-      if (newTag && !tags.includes(newTag)) {
-        setTags([...tags, newTag]);
+      const rawTag = currentTag.trim();
+      const normalizedTag = rawTag
+        .toLowerCase()       
+        .replace(/\s+/g, ''); 
+      if (normalizedTag && !tags.includes(normalizedTag)) {
+        setTags([...tags, normalizedTag]); 
       }
-      setCurrentTag("");
+      setCurrentTag(""); 
     }
   };
 

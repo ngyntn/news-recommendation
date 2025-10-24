@@ -1,49 +1,28 @@
-// components/BookmarkInteraction.jsx
-import React, { useState, useEffect } from "react"; // Thêm useEffect
-import { useDispatch, useSelector } from "react-redux"; // Thêm useSelector
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Bookmark } from "lucide-react";
-import { toggleBookmark } from "../api/articleApi"; // Import thunk toggleBookmark
+import { toggleBookmark } from "../api/articleApi";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom"; // Để chuyển hướng khi chưa đăng nhập
+import { useNavigate } from "react-router-dom";
 
 const BookmarkInteraction = ({ article }) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate(); // Khởi tạo navigate
-  const { currentUser } = useSelector((state) => state.user); // Lấy currentUser từ Redux
+    const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
 
-  // Sử dụng trạng thái ban đầu từ article.isBookmarked
   const [isBookmarked, setIsBookmarked] = useState(article.isBookmarked);
-  const [isLoading, setIsLoading] = useState(false); // Trạng thái loading riêng
 
-  // Cập nhật trạng thái isBookmarked khi article thay đổi
-  // Điều này quan trọng nếu article được fetch lại hoặc cập nhật từ bên ngoài
   useEffect(() => {
     setIsBookmarked(article.isBookmarked);
   }, [article.isBookmarked]);
 
   const handleBookmark = async () => {
-    if (!currentUser) {
-      toast.info("Bạn cần đăng nhập để lưu bài viết");
-      navigate("/sign-in"); // Chuyển đến trang đăng nhập
-      return;
-    }
-
-    setIsLoading(true); // Bắt đầu loading
+    const oldState = isBookmarked;
+    setIsBookmarked(!oldState);
     try {
-      // Dispatch thunk toggleBookmark. Nó sẽ trả về trạng thái bookmark mới
-      const resultAction = await dispatch(toggleBookmark(article.id)).unwrap();
-      
-      // Cập nhật state cục bộ dựa trên kết quả trả về từ backend
-      setIsBookmarked(resultAction.isBookmarked); // resultAction.isBookmarked là true/false
-      
-      toast.success(
-        resultAction.isBookmarked ? "Đã lưu bài viết!" : "Đã bỏ lưu bài viết."
-      );
-
+      await dispatch(toggleBookmark(article.id)).unwrap();
     } catch (error) {
-      toast.error(error.message || "Đã xảy ra lỗi khi lưu bài viết.");
-    } finally {
-      setIsLoading(false); // Kết thúc loading
+      toast.error(error.message || "Lỗi: Không thể lưu bài viết.");
+      setIsBookmarked(oldState);
     }
   };
 

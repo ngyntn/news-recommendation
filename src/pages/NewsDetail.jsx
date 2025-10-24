@@ -180,10 +180,9 @@ function NewsDetail() {
             <div className="mt-6 pt-4 border-t border-base-200 dark:border-base-700 flex flex-wrap gap-2">
               {item.tags.map((tag) => (
                 <Link
-                  // Giả sử bạn muốn click vào tag để tìm kiếm
                   to={`/search/${tag.name}`} 
                   key={tag.id}
-                  className="btn btn-sm btn-ghost bg-gray-100 dark:bg-gray-800 rounded-full font-normal capitalize hover:bg-gray-200 dark:hover:bg-gray-700"
+                  className="btn btn-sm btn-ghost bg-gray-100 dark:bg-gray-800 rounded-full font-normal hover:bg-gray-200 dark:hover:bg-gray-700"
                 >
                   # {tag.name}
                 </Link>
@@ -215,15 +214,5 @@ function NewsDetail() {
     </div>
   );
 }
-
-// === COMPONENT CON CHO SIDEBAR ===
-
-// Card nhỏ cho sidebar
-
-
-// Component cho "Bài viết khác của tác giả"
-
-
-
 
 export default NewsDetail;

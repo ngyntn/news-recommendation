@@ -1,25 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Heart } from 'lucide-react';
 import { convertLikeNumber } from '../utils/convert';
 import { updateArticleLike } from '../api/articleApi';
+import { toast } from 'react-hot-toast';
 
 const LikeInteraction = ({ article }) => {
     const dispatch = useDispatch();
-    const [isLiked, setIsLiked] = useState(false);
+    const [isLiked, setIsLiked] = useState(article.isLiked);
     const [likeCount, setLikeCount] = useState(article.likesCount || 0);
 
-    const handleLike = () => {
-        const newIsLiked = !isLiked;
-        const newLikeCount = newIsLiked ? likeCount + 1 : likeCount - 1;
+    useEffect(() => {
+        setIsLiked(article.isLiked);
+        setLikeCount(article.likesCount || 0);
+    }, [article.isLiked, article.likesCount]);
 
-        setIsLiked(newIsLiked);
-        setLikeCount(newLikeCount);
+    const handleLike = async () => {
+        const oldState = {
+            isLiked: isLiked,
+            likeCount: likeCount,
+        };
 
-        dispatch(updateArticleLike({ 
-            articleId: article.id, 
-            newLikeCount: newLikeCount 
-        }));
+        const newState = {
+            isLiked: !isLiked,
+            likeCount: !isLiked ? likeCount + 1 : likeCount - 1,
+        };
+        setIsLiked(newState.isLiked);
+        setLikeCount(newState.likeCount);
+
+        try {
+            await dispatch(updateArticleLike(article.id)).unwrap();
+        } catch (error) {
+            toast.error(error.message || "Lỗi: Không thể thích bài viết.");
+            setIsLiked(oldState.isLiked);
+            setLikeCount(oldState.likeCount);
+        }
     };
 
     return (
