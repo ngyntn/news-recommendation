@@ -118,12 +118,7 @@ export const toggleBookmark = createAsyncThunk(
     "articles/toggleBookmark",
     async (articleId, { rejectWithValue }) => {
       try {
-        // API của bạn có thể là POST hoặc PUT
-        // Nó cần token (đã được api interceptor xử lý)
         const response = await api.post(`/articles/${articleId}/bookmark`);
-        
-        // Trả về dữ liệu mới (ví dụ: { isBookmarked: true })
-        // Backend nên trả về trạng thái bookmark mới
         return response.data.data; 
       } catch (error) {
         return rejectWithValue(error.response?.data?.message || error.message);

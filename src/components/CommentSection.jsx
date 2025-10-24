@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchComments, postComment } from "../api/commentApi";
+import { fetchComments } from "../api/commentApi";
 import CommentForm from "./CommentForm";
 import Comment from "./Comment";
+
 
 const CommentSection = ({ articleId, totalComments }) => {
   const dispatch = useDispatch();

@@ -73,12 +73,12 @@ const NewsCard = ({
                 className="flex items-center group"
               >
                 <img
-                  src={author.avatar}
-                  alt={author.name}
+                  src={author.avatarUrl}
+                  alt={author.fullName}
                   className="w-6 h-6 rounded-full mr-2 object-cover"
                 />
                 <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:underline">
-                  {author.name}
+                  {author.fullName}
                 </span>
               </Link>
             ) : (

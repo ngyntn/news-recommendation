@@ -13,7 +13,42 @@ import {
   fetchRelatedArticlesByTag,
 } from "../api/articleApi";
 
-import { fetchComments, postComment } from "../api/commentApi";
+import {
+  fetchComments,
+  postComment,
+  updateComment,
+  deleteComment,
+} from "../api/commentApi";
+
+const deleteCommentFromState = (comments, deletedInfo) => {
+  const { id: deletedId, parentId } = deletedInfo;
+
+  if (parentId) {
+    const parent = comments.find((c) => c.id === parentId);
+    if (parent && parent.replies) {
+      parent.replies = parent.replies.filter((r) => r.id !== deletedId);
+    }
+  } else {
+    return comments.filter((c) => c.id !== deletedId);
+  }
+  return comments;
+};
+
+const updateCommentInState = (comments, updatedComment) => {
+  if (updatedComment.parentId) {
+    const parent = comments.find((c) => c.id === updatedComment.parentId);
+    if (parent && parent.replies) {
+      parent.replies = parent.replies.map((r) =>
+        r.id === updatedComment.id ? updatedComment : r
+      );
+    }
+  } else {
+    return comments.map((c) =>
+      c.id === updatedComment.id ? updatedComment : c
+    );
+  }
+  return comments;
+};
 
 const initialState = {
   items: [],
@@ -35,18 +70,18 @@ const initialState = {
   itemError: null,
 
   comments: {
-    items: [], 
+    items: [],
     page: 1,
     hasMore: true,
     loading: false,
     error: null,
-    },
-  
+  },
+
   authorArticles: [],
   authorArticlesLoading: false,
   relatedArticles: [],
-    relatedArticlesLoading: false,
-  
+  relatedArticlesLoading: false,
+
   searchedItems: [],
   searchedAuthors: {},
   searchedLoading: false,
@@ -293,16 +328,16 @@ const newsSlice = createSlice({
       })
       .addCase(fetchComments.fulfilled, (state, action) => {
         const { comments, pagination } = action.payload;
-        
+
         if (pagination.currentPage === 1) {
-            state.comments.items = comments;
+          state.comments.items = comments;
         } else {
-            const newComments = comments.filter(
-                c => !state.comments.items.find(ic => ic.id === c.id)
-            );
-            state.comments.items.push(...newComments);
+          const newComments = comments.filter(
+            (c) => !state.comments.items.find((ic) => ic.id === c.id)
+          );
+          state.comments.items.push(...newComments);
         }
-        
+
         state.comments.page = pagination.currentPage + 1;
         state.comments.hasMore = pagination.currentPage < pagination.totalPages;
         state.comments.loading = false;
@@ -311,24 +346,54 @@ const newsSlice = createSlice({
         state.comments.loading = false;
         state.comments.error = action.payload;
       })
-      
+
       .addCase(postComment.fulfilled, (state, action) => {
-        const newComment = action.payload; 
-        
+        const newComment = action.payload;
+
         if (newComment.parentId) {
-            const parentComment = state.comments.items.find(
-                c => c.id === newComment.parentId
-            );
-            if (parentComment) {
-                if (!parentComment.replies) {
-                    parentComment.replies = [];
-                }
-                parentComment.replies.push(newComment);
+          const parentComment = state.comments.items.find(
+            (c) => c.id === newComment.parentId
+          );
+          if (parentComment) {
+            if (!parentComment.replies) {
+              parentComment.replies = [];
             }
+            parentComment.replies.push(newComment);
+          }
         } else {
-            state.comments.items.unshift(newComment);
+          state.comments.items.unshift(newComment);
+        }
+
+        if (state.item) {
+          state.item.commentsCount += 1;
         }
       })
+      .addCase(updateComment.fulfilled, (state, action) => {
+        const updatedComment = action.payload;
+        state.comments.items = updateCommentInState(
+          state.comments.items,
+          updatedComment
+        );
+      })
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        const deletedInfo = action.payload;
+        let deletedCount = 1;
+        if (deletedInfo.parentId == null) {
+          const parentComment = state.comments.items.find(
+            (c) => c.id === deletedInfo.id
+          );
+          if (parentComment && parentComment.replies) {
+            deletedCount += parentComment.replies.length;
+          }
+        }
+        state.comments.items = deleteCommentFromState(
+          state.comments.items,
+          deletedInfo
+        );
+        if (state.item) {
+          state.item.commentsCount -= deletedCount;
+        }
+      });
   },
 });
 
