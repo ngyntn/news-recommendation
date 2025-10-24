@@ -11,6 +11,7 @@ import {
   toggleBookmark,
   fetchAuthorArticles,
   fetchRelatedArticlesByTag,
+  fetchRecommendedNewsV2,
 } from "../api/articleApi";
 
 import {
@@ -169,6 +170,39 @@ const newsSlice = createSlice({
         }
       })
       .addCase(fetchRecommendedNews.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Recommended News V2
+      .addCase(fetchRecommendedNewsV2.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchRecommendedNewsV2.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload && action.payload.articles) {
+          action.payload.articles.forEach((article) => {
+            if (!state.items.find((item) => item.id === article.id)) {
+              state.items.push(article);
+            }
+          });
+
+          const { pagination } = action.payload;
+          if (pagination && typeof pagination.currentPage === "number") {
+            state.page = pagination.currentPage + 1;
+            state.hasMore = pagination.currentPage < pagination.totalPages;
+          } else {
+            state.hasMore = false;
+            console.error(
+              "Lỗi: Dữ liệu phân trang không hợp lệ từ API (Recommended)",
+              action.payload
+            );
+          }
+        } else {
+          state.hasMore = false;
+        }
+      })
+      .addCase(fetchRecommendedNewsV2.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
