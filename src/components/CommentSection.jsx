@@ -1,56 +1,77 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { postComment } from '../api/commentApi';
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchComments, postComment } from "../api/commentApi";
+import CommentForm from "./CommentForm";
+import Comment from "./Comment";
 
-const Comment = ({ comment, author }) => (
-    <div className="flex gap-3 py-4">
-        <img src={author?.avatar} alt={author?.name} className="w-10 h-10 rounded-full object-cover" />
-        <div className="flex-1">
-            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                <p className="font-semibold text-gray-800 dark:text-gray-100">{author?.name || 'Người dùng ẩn danh'}</p>
-                <p className="text-gray-700 dark:text-gray-300">{comment.content}</p>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{new Date(comment.createdAt).toLocaleString()}</p>
+const CommentSection = ({ articleId, totalComments }) => {
+  const dispatch = useDispatch();
+
+  const { currentUser } = useSelector((state) => state.user);
+  const {
+    items: comments,
+    page,
+    hasMore,
+    loading,
+    error,
+  } = useSelector((state) => state.news.comments);
+
+  useEffect(() => {
+    if (articleId && currentUser) {
+      dispatch(fetchComments({ articleId, page: 1, limit: 10 }));
+    }
+  }, [articleId, dispatch, currentUser]);
+
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      dispatch(fetchComments({ articleId, page: page, limit: 10 }));
+    }
+  };
+  console.log(totalComments);
+
+  return (
+    <div className="mt-8">
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        Bình luận ({totalComments || 0})
+      </h3>
+
+      {/* Form post comment GỐC */}
+      <div className="mb-6">
+        <CommentForm articleId={articleId} currentUser={currentUser} />
+      </div>
+
+      {/* Danh sách bình luận */}
+      <div className="space-y-4 divide-y divide-gray-200 dark:divide-gray-700">
+        {comments.map((comment) => (
+          <Comment
+            key={comment.id}
+            comment={comment}
+            articleId={articleId}
+            currentUser={currentUser}
+          />
+        ))}
+      </div>
+
+      {/* Lỗi / Nút "Tải thêm" */}
+      {error && <p className="text-center text-red-500 mt-4">{error}</p>}
+      {hasMore && (
+        <div className="text-center mt-6">
+          <button
+            onClick={handleLoadMore}
+            className="btn btn-ghost"
+            disabled={loading}
+          >
+            {loading ? "Đang tải..." : "Tải thêm bình luận"}
+          </button>
         </div>
+      )}
+      {!hasMore && comments.length > 0 && (
+        <p className="text-center text-gray-500 dark:text-gray-400 mt-6">
+          Đã hiển thị tất cả bình luận.
+        </p>
+      )}
     </div>
-);
-
-const CommentSection = ({ articleId }) => {
-    const dispatch = useDispatch();
-    const [newComment, setNewComment] = useState("");
-    const { currentUser } = useSelector(state => state.user);
-    const { itemComments, itemCommentAuthors } = useSelector(state => state.news);
-
-    const handleSubmitComment = (e) => {
-        e.preventDefault();
-        if (!newComment.trim() || !currentUser) return;
-        dispatch(postComment({ articleId, content: newComment, currentUser }));
-        setNewComment("");
-    };
-
-    return (
-        <div className="mt-8">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Bình luận</h3>
-            {currentUser && (
-                <form onSubmit={handleSubmitComment} className="flex gap-3 mb-6">
-                    <img src={currentUser.avatar} alt="Your avatar" className="w-10 h-10 rounded-full object-cover" />
-                    <input 
-                        type="text"
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Viết bình luận..."
-                        className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-200"
-                    />
-                    <button type="submit" className="bg-indigo-600 text-white font-semibold px-4 py-2 rounded-full hover:bg-indigo-700">Gửi</button>
-                </form>
-            )}
-            <div>
-                {itemComments.map(comment => (
-                    <Comment key={comment.id} comment={comment} author={itemCommentAuthors[comment.userId]} />
-                ))}
-            </div>
-        </div>
-    );
+  );
 };
 
 export default CommentSection;

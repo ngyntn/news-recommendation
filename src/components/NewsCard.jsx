@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import rehypeRaw from "rehype-raw";
-import { Heart, Bookmark } from "lucide-react";
+import { Heart, Bookmark, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { convertDateTimeToVietnam, convertLikeNumber } from "../utils/convert";
 
@@ -13,8 +13,9 @@ const NewsCard = ({
   createdAt,
   content,
   likeCount: initialLikeCount,
+  commentsCount,
   tags = [],
-    thumbnailUrl,
+  thumbnailUrl,
   slug,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -91,9 +92,9 @@ const NewsCard = ({
             </span>
           </div>
         </div>
-        <div className="flex items-center space-x-4 px-2">
+        <div className="flex-shrink-0 flex items-center space-x-4 px-2 ml-4">
           {/* Nút Like */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1" title="Lượt thích">
             <button
               onClick={handleLike}
               className={`text-sm font-medium ${
@@ -101,7 +102,6 @@ const NewsCard = ({
                   ? "text-red-500"
                   : "text-gray-600 dark:text-gray-400"
               } hover:text-red-500 transition-colors`}
-              title="Thích"
             >
               <Heart
                 className="w-5 h-5"
@@ -113,7 +113,17 @@ const NewsCard = ({
             </p>
           </div>
 
-          {/* Nút Bookmark MỚI */}
+          {/* Comment */}
+          <div
+            className="flex items-center space-x-1 text-gray-600 dark:text-gray-400"
+            title="Lượt bình luận"
+          >
+            <MessageSquare className="w-5 h-5" />
+            <p className="text-sm">{convertLikeNumber(commentsCount || 0)}</p>
+          </div>
+          {/* ============================ */}
+
+          {/* Nút Bookmark */}
           <button
             onClick={handleBookmark}
             className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors"

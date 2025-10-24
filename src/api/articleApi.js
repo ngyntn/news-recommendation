@@ -163,15 +163,30 @@ export const fetchFeedNews = createAsyncThunk(
     }
 );
 
-export const fetchRelatedArticles = createAsyncThunk('news/fetchRelated',
-    async ({ authorId, currentArticleId }, { rejectWithValue }) => {
-        if (!authorId) return [];
+export const fetchAuthorArticles = createAsyncThunk(
+    'articles/fetchByAuthor',
+    async ({ authorId, excludeId, limit = 5 }, { rejectWithValue }) => {
         try {
-            const response = await api.get(ARTICLES_API, { params: { userId: authorId } });
-            const articles = response.data;
-            return articles.filter(a => a.id !== currentArticleId).slice(0, 3);
-        } catch (error) { 
-            return rejectWithValue(error.response?.data?.message || error.message); 
+            const response = await api.get('/articles/author', { 
+                params: { authorId, excludeId, limit } 
+            });
+            return response.data.data.articles; 
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
+
+export const fetchRelatedArticlesByTag = createAsyncThunk(
+    'articles/fetchByTag',
+    async ({ tagIds, excludeId, limit = 5 }, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/articles/related', { 
+                params: { tagIds, excludeId, limit } 
+            });
+            return response.data.data.articles; 
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );

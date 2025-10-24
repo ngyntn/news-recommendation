@@ -9,7 +9,8 @@ import {
   fetchFeedNews,
   updateArticleLike,
   toggleBookmark,
-  fetchRelatedArticles,
+  fetchAuthorArticles,
+  fetchRelatedArticlesByTag,
 } from "../api/articleApi";
 
 import { fetchComments, postComment } from "../api/commentApi";
@@ -33,9 +34,19 @@ const initialState = {
   itemLoading: false,
   itemError: null,
 
-  itemComments: [],
-  itemCommentAuthors: {},
-  relatedItems: [],
+  comments: {
+    items: [], 
+    page: 1,
+    hasMore: true,
+    loading: false,
+    error: null,
+    },
+  
+  authorArticles: [],
+  authorArticlesLoading: false,
+  relatedArticles: [],
+    relatedArticlesLoading: false,
+  
   searchedItems: [],
   searchedAuthors: {},
   searchedLoading: false,
@@ -68,9 +79,17 @@ const newsSlice = createSlice({
       state.item = null;
       state.itemLoading = false;
       state.itemError = null;
-      state.itemComments = [];
-      state.itemCommentAuthors = {};
-      state.relatedItems = [];
+      state.comments = {
+        items: [],
+        page: 1,
+        hasMore: true,
+        loading: false,
+        error: null,
+      };
+      state.authorArticles = [];
+      state.authorArticlesLoading = false;
+      state.relatedArticles = [];
+      state.relatedArticlesLoading = false;
     },
     resetArticleStatus: (state) => {
       state.createStatus = "idle";
@@ -175,6 +194,31 @@ const newsSlice = createSlice({
           action.error.message
         );
       })
+      // Author Articles
+      .addCase(fetchAuthorArticles.pending, (state) => {
+        state.authorArticlesLoading = true;
+      })
+      .addCase(fetchAuthorArticles.fulfilled, (state, action) => {
+        state.authorArticlesLoading = false;
+        state.authorArticles = action.payload;
+      })
+      .addCase(fetchAuthorArticles.rejected, (state, action) => {
+        state.authorArticlesLoading = false;
+        console.error("Failed to fetch author articles:", action.payload);
+      })
+
+      //   Related Articles by Tag
+      .addCase(fetchRelatedArticlesByTag.pending, (state) => {
+        state.relatedArticlesLoading = true;
+      })
+      .addCase(fetchRelatedArticlesByTag.fulfilled, (state, action) => {
+        state.relatedArticlesLoading = false;
+        state.relatedArticles = action.payload;
+      })
+      .addCase(fetchRelatedArticlesByTag.rejected, (state, action) => {
+        state.relatedArticlesLoading = false;
+        console.error("Failed to fetch related articles:", action.payload);
+      })
       // Create News
       .addCase(createNews.pending, (state) => {
         state.createStatus = "loading";
@@ -244,21 +288,47 @@ const newsSlice = createSlice({
         console.error("Bookmark failed:", action.payload);
       })
       // Comments
+      .addCase(fetchComments.pending, (state) => {
+        state.comments.loading = true;
+      })
       .addCase(fetchComments.fulfilled, (state, action) => {
-        state.itemComments = action.payload.comments.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        state.itemCommentAuthors = action.payload.authors;
+        const { comments, pagination } = action.payload;
+        
+        if (pagination.currentPage === 1) {
+            state.comments.items = comments;
+        } else {
+            const newComments = comments.filter(
+                c => !state.comments.items.find(ic => ic.id === c.id)
+            );
+            state.comments.items.push(...newComments);
+        }
+        
+        state.comments.page = pagination.currentPage + 1;
+        state.comments.hasMore = pagination.currentPage < pagination.totalPages;
+        state.comments.loading = false;
       })
+      .addCase(fetchComments.rejected, (state, action) => {
+        state.comments.loading = false;
+        state.comments.error = action.payload;
+      })
+      
       .addCase(postComment.fulfilled, (state, action) => {
-        state.itemComments.unshift(action.payload.comment);
-        state.itemCommentAuthors[action.payload.author.id] =
-          action.payload.author;
+        const newComment = action.payload; 
+        
+        if (newComment.parentId) {
+            const parentComment = state.comments.items.find(
+                c => c.id === newComment.parentId
+            );
+            if (parentComment) {
+                if (!parentComment.replies) {
+                    parentComment.replies = [];
+                }
+                parentComment.replies.push(newComment);
+            }
+        } else {
+            state.comments.items.unshift(newComment);
+        }
       })
-      // Related Articles
-      .addCase(fetchRelatedArticles.fulfilled, (state, action) => {
-        state.relatedItems = action.payload;
-      });
   },
 });
 
