@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { api } from './apiClient';
-
+   
 export const fetchRecommendedNews = createAsyncThunk(
     'articles/fetchRecommended', 
     async ({ page, limit = 10 }, { rejectWithValue }) => {
@@ -8,6 +8,31 @@ export const fetchRecommendedNews = createAsyncThunk(
             const response = await api.get('/articles', { params: { page, limit } });
             const resData = response.data.data;
             console.log("SSSS",resData)
+            return { 
+                articles: resData.articles, 
+                pagination: resData.pagination
+            };
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
+
+
+   
+export const fetchRecommendedNewsV2 = createAsyncThunk(
+    'articles/fetchRecommendedV2', 
+    async ({ page, limit = 10 }, { rejectWithValue }) => {
+        try {
+            const userId = localStorage.getItem('currentUser') 
+                ? JSON.parse(localStorage.getItem('currentUser')).id
+                : null;
+            if (userId === null) throw new Error("User not logged in");
+
+            const response = await api.get('/articles/recommend', { params: { userId, page, limit } });
+            const resData = response.data.data;
+            console.log("Recommended results: ",resData)
+
             return { 
                 articles: resData.articles, 
                 pagination: resData.pagination

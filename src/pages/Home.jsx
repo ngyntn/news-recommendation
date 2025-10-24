@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector, shallowEqual } from "react-redux"; 
-import { fetchRecommendedNews } from "../api/articleApi";
+import { fetchRecommendedNews, fetchRecommendedNewsV2 } from "../api/articleApi";
 import { resetHomeNews } from "../store/newsSlice"; 
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll"; 
 import ArticleList from "../components/ArticleList"; 
@@ -18,7 +18,7 @@ function Home() {
 
     const { items, loading, error, hasMore, lastElementRef } = useInfiniteScroll({
         listState,
-        fetchThunk: fetchRecommendedNews,
+        fetchThunk: fetchRecommendedNewsV2,
         resetAction: resetHomeNews
     });
 
