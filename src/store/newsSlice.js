@@ -12,6 +12,7 @@ import {
   fetchAuthorArticles,
   fetchRelatedArticlesByTag,
   fetchRecommendedNewsV2,
+  fetchNewsByKeySearchV2,
 } from "../api/articleApi";
 
 import {
@@ -334,6 +335,27 @@ const newsSlice = createSlice({
         state.searchedAuthors = authors;
       })
       .addCase(fetchNewsByKeySearch.rejected, (state, action) => {
+        state.searchedLoading = false;
+        state.searchedError = action.error.message;
+        console.log(
+          "NewsSlice.js: Error fetching searched news",
+          action.error.message
+        );
+      })
+
+      // Search News
+      .addCase(fetchNewsByKeySearchV2.pending, (state) => {
+        state.searchedLoading = true;
+        state.searchedError = null;
+      })
+      .addCase(fetchNewsByKeySearchV2.fulfilled, (state, action) => {
+        state.searchedLoading = false;
+        const { articles, authors } = action.payload;
+        console.log("Fetched articles:", articles);
+        state.searchedItems = articles;
+        state.searchedAuthors = authors;
+      })
+      .addCase(fetchNewsByKeySearchV2.rejected, (state, action) => {
         state.searchedLoading = false;
         state.searchedError = action.error.message;
         console.log(
