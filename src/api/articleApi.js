@@ -68,6 +68,19 @@ export const fetchNewsByKeySearch = createAsyncThunk(
     }
 );
 
+
+export const fetchNewsByKeySearchV2 = createAsyncThunk(
+    'articles/search/knn',
+    async ({ keySearch, page, limit }, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/articles/search/knn', { params: { query: keySearch, page, limit } });
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
+
 export const createNews = createAsyncThunk(
     'articles/create',
     async (formData, { rejectWithValue }) => {
