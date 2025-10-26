@@ -174,7 +174,7 @@ const newsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Recommended News V2
       .addCase(fetchRecommendedNewsV2.pending, (state) => {
         state.loading = true;
@@ -350,10 +350,19 @@ const newsSlice = createSlice({
       })
       .addCase(fetchNewsByKeySearchV2.fulfilled, (state, action) => {
         state.searchedLoading = false;
-        const { articles, authors } = action.payload;
+        console.log("Search results payload:", action.payload);
+        const { articles, authors, page } = action.payload;
         console.log("Fetched articles:", articles);
-        state.searchedItems = articles;
-        state.searchedAuthors = authors;
+        if (page && page === 1) {
+          // Thay thế cho page 1
+          state.searchedItems = articles;
+          state.searchedAuthors = authors;
+        } else {
+          // Append cho page >1
+          console.log("Appending articles for page:", page);
+          state.searchedItems = [...state.searchedItems, ...articles];
+          state.searchedAuthors = { ...state.searchedAuthors, ...authors };
+        }
       })
       .addCase(fetchNewsByKeySearchV2.rejected, (state, action) => {
         state.searchedLoading = false;

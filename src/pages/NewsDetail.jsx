@@ -96,7 +96,7 @@ function NewsDetail() {
       <img
         src={item.thumbnailUrl}
         alt={item.title}
-        className="w-full h-auto max-h-[350px] md:max-h-[500px] object-cover"
+        className="w-full h-[40vh] object-cover"
       />
 
       {/* === LAYOUT 3 CỘT (MỚI) === */}

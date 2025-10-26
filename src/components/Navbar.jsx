@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Home } from "lucide-react";
 import UserMenu from "./UserMenu"; 
 import NotificationBell from "./NotificationBell";
@@ -7,9 +7,12 @@ import NotificationBell from "./NotificationBell";
 function Navbar() {
     const [query, setQuery] = useState("");
     const navigate = useNavigate();
+    const location = useLocation();
+    const params = useParams();
 
     const handleSearch = () => {
         if (query.trim() !== "") {
+            localStorage.setItem('lastSearchQuery', query);
             navigate(`/search/${query}`);
         }
     };
@@ -20,6 +23,16 @@ function Navbar() {
         }
     };
 
+    useEffect(() => {
+        if (location.pathname.startsWith('/search/')) {
+            const lastQuery = localStorage.getItem('lastSearchQuery') || '';
+            setQuery(lastQuery || params.query || '');
+        } else {
+            setQuery('');
+            localStorage.removeItem('lastSearchQuery');
+        }
+    }, [location.pathname]);
+
     return (
         <div className="fixed top-0 left-0 w-full bg-white dark:bg-gray-900 z-50 py-2 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
             <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-12">
@@ -27,9 +40,10 @@ function Navbar() {
                 {/* Logo */}
                 <div className="flex-shrink-0">
                     <Link to="/" className="flex items-center gap-2">
-                        <img src="/React-icon.svg" alt="Logo" className="h-8 w-auto" />
-                        <span className="text-xl font-bold text-gray-800 dark:text-gray-100 hidden sm:block">
-                            NewsRec
+                        <img src="/logo-light.png" alt="Logo" className="block dark:hidden h-8 w-auto" />
+                        <img src="/logo-dark.png" alt="Logo" className="hidden dark:block h-8 w-auto" />
+                        <span className="logo-font text-[30px] font-bold text-black dark:text-gray-100 hidden sm:block px-[5px]">
+                            Novum
                         </span>
                     </Link>
                 </div>

@@ -18,7 +18,8 @@ const SearchResultItem = ({ item, author }) => {
     };
 
     const handleNavigate = () => {
-        navigate(`/news/${item.id}`);
+        console.log("Navigating to article:", item.slug);
+        navigate(`/news/${item.slug}`);
     };
 
     const handleLike = (e) => {
