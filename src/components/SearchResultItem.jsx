@@ -18,7 +18,8 @@ const SearchResultItem = ({ item, author }) => {
     };
 
     const handleNavigate = () => {
-        navigate(`/news/${item.id}`);
+        console.log("Navigating to article:", item.slug);
+        navigate(`/news/${item.slug}`);
     };
 
     const handleLike = (e) => {
@@ -42,7 +43,7 @@ const SearchResultItem = ({ item, author }) => {
             <h2 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100 hover:underline">{item.title}</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{snippet}</p>
             <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <span>{author?.name || 'Tác giả ẩn danh'}</span>
+                <span>{author?.fullName || 'Tác giả ẩn danh'}</span>
                 <span className="mx-2">•</span>
                 <span>{convertDateTimeToVietnam(item.publishedAt)}</span>
                 <span className="mx-2">•</span>

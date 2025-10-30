@@ -12,6 +12,7 @@ import {
   fetchAuthorArticles,
   fetchRelatedArticlesByTag,
   fetchRecommendedNewsV2,
+  fetchNewsByKeySearchV2,
 } from "../api/articleApi";
 
 import {
@@ -173,7 +174,7 @@ const newsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Recommended News V2
       .addCase(fetchRecommendedNewsV2.pending, (state) => {
         state.loading = true;
@@ -334,6 +335,36 @@ const newsSlice = createSlice({
         state.searchedAuthors = authors;
       })
       .addCase(fetchNewsByKeySearch.rejected, (state, action) => {
+        state.searchedLoading = false;
+        state.searchedError = action.error.message;
+        console.log(
+          "NewsSlice.js: Error fetching searched news",
+          action.error.message
+        );
+      })
+
+      // Search News
+      .addCase(fetchNewsByKeySearchV2.pending, (state) => {
+        state.searchedLoading = true;
+        state.searchedError = null;
+      })
+      .addCase(fetchNewsByKeySearchV2.fulfilled, (state, action) => {
+        state.searchedLoading = false;
+        console.log("Search results payload:", action.payload);
+        const { articles, authors, page } = action.payload;
+        console.log("Fetched articles:", articles);
+        if (page && page === 1) {
+          // Thay thế cho page 1
+          state.searchedItems = articles;
+          state.searchedAuthors = authors;
+        } else {
+          // Append cho page >1
+          console.log("Appending articles for page:", page);
+          state.searchedItems = [...state.searchedItems, ...articles];
+          state.searchedAuthors = { ...state.searchedAuthors, ...authors };
+        }
+      })
+      .addCase(fetchNewsByKeySearchV2.rejected, (state, action) => {
         state.searchedLoading = false;
         state.searchedError = action.error.message;
         console.log(

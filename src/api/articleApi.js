@@ -47,6 +47,7 @@ export const fetchDetailNews = createAsyncThunk(
     'articles/fetchDetail',
     async (slug, { rejectWithValue }) => { 
         try {
+            console.log("Start fetching detail for slug:", slug);
             const response = await api.get(`/articles/${slug}`);
             console.log("DETAIL",response)
             return response.data.data; 
@@ -62,6 +63,19 @@ export const fetchNewsByKeySearch = createAsyncThunk(
         try {
             const response = await api.get('/articles/search', { params: { q: keySearch } });
             return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
+
+
+export const fetchNewsByKeySearchV2 = createAsyncThunk(
+    'articles/search/knn',
+    async ({ keySearch, page, limit }, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/articles/search/knn', { params: { query: keySearch, page, limit } });
+            return { ...response.data.data, page };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
