@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import {
   BrowserRouter as Router,
@@ -30,6 +30,7 @@ import ReportManagement from "./pages/admin/ReportManagement";
 import { loadUserFromStorage } from "./store/userSlice";
 import Notifications from "./pages/Notifications";
 import Loader from "./components/Loader";
+import { initSocket, getSocket, disconnectSocket } from "./utils/socket";
 
 const ProtectedLayout = () => {
   const { currentUser, status } = useSelector((state) => state.user);
@@ -76,10 +77,21 @@ function LayoutWithNavbar() {
 
 function App() {
   const dispatch = useDispatch();
+  const { currentUser } = useSelector((state) => state.user);
   useEffect(() => {
     // dispatch(fetchCurrentUser());
     dispatch(loadUserFromStorage());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (currentUser) {
+      initSocket(currentUser.id, dispatch);
+    }
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [currentUser, dispatch]);
 
   return (
     <Router>
