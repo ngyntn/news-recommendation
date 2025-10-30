@@ -1,19 +1,31 @@
-import React, { useState } from "react";
-import { convertDateTimeToVietnam } from "../utils/convert";
+import React, { useState, useCallback } from "react";
+import { convertDateTimeToVietnam, formatTimeAgo } from "../utils/convert";
 import { Edit2, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import EditCommentForm from "./EditCommentForm";
 import { deleteComment } from "../api/commentApi";
 import { useDispatch } from "react-redux";
+import CommentForm from "./CommentForm";
+import { api } from "../api/apiClient";
 
 const Comment = ({ comment, articleId, currentUser }) => {
   const dispatch = useDispatch();
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const { author, content, createdAt, replies, isAuthor } = comment;
+  const { author, content, createdAt, isAuthor, replyCount } = comment;
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const canEditOrDelete = currentUser.id === author?.id;
+
+  const [loadedReplies, setLoadedReplies] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const totalRepliesShown = loadedReplies.length;
+  const totalReplies = replyCount || 0;
+  const hasMore = totalReplies > totalRepliesShown;
+
+  const showLoadButton = totalReplies > 0;
 
   const handleDelete = async () => {
     if (
@@ -31,6 +43,25 @@ const Comment = ({ comment, articleId, currentUser }) => {
       }
     }
   };
+
+  const handleLoadReplies = useCallback(async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const limit = 5;
+      const response = await api.get(`/comments/${comment.id}/replies`, {
+        params: { page: currentPage, limit: limit },
+      });
+
+      const { comments: newReplies } = response.data.data;
+      setLoadedReplies((prev) => [...prev, ...newReplies]);
+      setCurrentPage((prev) => prev + 1);
+    } catch (error) {
+      toast.error("Lỗi khi tải phản hồi.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [comment.id, currentPage, isLoading]);
 
   return (
     <div className="flex gap-3 py-4">
@@ -101,23 +132,38 @@ const Comment = ({ comment, articleId, currentUser }) => {
 
             {/* Nút chức năng (Thời gian, Trả lời) */}
             <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
-              <span>{convertDateTimeToVietnam(createdAt)}</span>
-              {comment.parentId === null && (
-                <button
-                  onClick={() => setShowReplyForm(!showReplyForm)}
-                  className="font-semibold hover:underline"
-                >
-                  {showReplyForm ? "Hủy" : "Trả lời"}
-                </button>
-              )}
+            <span
+                className="tooltip tooltip-bottom"
+                title={convertDateTimeToVietnam(createdAt)}
+              >
+                {formatTimeAgo(createdAt)}
+              </span>
+              <button
+                onClick={() => setShowReplyForm(!showReplyForm)}
+                className="font-semibold hover:underline"
+              >
+                {showReplyForm ? "Hủy" : "Trả lời"}
+              </button>
             </div>
           </>
         )}
 
-        {/* Đệ quy Render replies */}
-        {replies && replies.length > 0 && (
+        {showReplyForm && (
+          <div className="mt-4">
+            <CommentForm
+              articleId={articleId}
+              parentId={comment.id}
+              placeholder={`Trả lời ${author?.fullName}...`}
+              onCommentPosted={() => setShowReplyForm(false)}
+              currentUser={currentUser}
+            />
+          </div>
+        )}
+
+        {/* 1. Chỉ render replies đã được TẢI (loadedReplies) */}
+        {loadedReplies.length > 0 && (
           <div className="mt-4 pl-6 border-l-2 border-gray-200 dark:border-gray-700">
-            {replies.map((reply) => (
+            {loadedReplies.map((reply) => (
               <Comment
                 key={reply.id}
                 comment={reply}
@@ -125,6 +171,25 @@ const Comment = ({ comment, articleId, currentUser }) => {
                 currentUser={currentUser}
               />
             ))}
+          </div>
+        )}
+
+        {/* 2. Nút "Tải thêm" */}
+        {showLoadButton && (
+          <div className="mt-4 pl-6">
+            <button
+              onClick={handleLoadReplies}
+              className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+              disabled={isLoading || !hasMore} 
+            >
+              {isLoading && "Đang tải..."}
+              {!isLoading && hasMore && (
+                totalRepliesShown === 0
+                  ? `Xem ${totalReplies} phản hồi`
+                  : `Xem thêm ${totalReplies - totalRepliesShown} phản hồi`
+              )}
+              {!isLoading && !hasMore && totalRepliesShown > 0 && "Đã tải tất cả phản hồi"}
+            </button>
           </div>
         )}
       </div>
