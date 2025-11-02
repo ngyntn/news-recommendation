@@ -1,6 +1,6 @@
 // src/socket.js
 import { io } from "socket.io-client";
-import { addNotification, setUnreadCount } from "../store/notificationSlice";
+import { addOrUpdateNotification, setUnreadCount } from "../store/notificationSlice";
 import NotificationToast from "../components/NotificationToast";
 import { toast } from "react-hot-toast";
 
@@ -24,7 +24,7 @@ export const initSocket = (userId, dispatch) => {
 
   socket.on("new_notification", (notification) => {
     console.log("New notification received:", notification);
-    dispatch(addNotification(notification));
+    dispatch(addOrUpdateNotification(notification));
     toast.custom(
       (t) => <NotificationToast t={t} notification={notification} />,
       {
