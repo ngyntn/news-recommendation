@@ -6,6 +6,12 @@ import {
   markNotificationsAsRead,
 } from "../api/notificationApi";
 
+const updateOrPrepend = (list, newItem) => {
+    const filteredList = list.filter((item) => item.id !== newItem.id);
+    filteredList.unshift(newItem);
+    return filteredList;
+  };
+
 const initialState = {
   items: [],
   page: 1,
@@ -23,15 +29,16 @@ const notificationSlice = createSlice({
   name: "notifications",
   initialState,
   reducers: {
-    addNotification: (state, action) => {
-      const newNotification = action.payload;
-      state.items.unshift(newNotification);
-      state.dropdownItems.unshift(newNotification);
-      if (state.dropdownItems.length > 7) {
-        state.dropdownItems.pop();
-      }
-      state.unreadCount += 1;
-    },
+    addOrUpdateNotification: (state, action) => {
+        const newNotification = action.payload;
+  
+        state.items = updateOrPrepend(state.items, newNotification);
+        state.dropdownItems = updateOrPrepend(state.dropdownItems, newNotification);
+  
+        if (state.dropdownItems.length > 7) {
+          state.dropdownItems.pop();
+        }
+      },
     setUnreadCount: (state, action) => {
       state.unreadCount = action.payload.unreadCount;
     },
@@ -99,6 +106,6 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { addNotification, setUnreadCount, resetNotifications } =
+export const { addOrUpdateNotification, setUnreadCount, resetNotifications } =
   notificationSlice.actions;
 export default notificationSlice.reducer;

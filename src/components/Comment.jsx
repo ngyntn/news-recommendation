@@ -11,7 +11,8 @@ import { api } from "../api/apiClient";
 const Comment = ({ comment, articleId, currentUser }) => {
   const dispatch = useDispatch();
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const { author, content, createdAt, isAuthor, replyCount } = comment;
+    const { author, content, createdAt, isAuthor, replyCount } = comment;
+    console.log("Comment data:", comment);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
