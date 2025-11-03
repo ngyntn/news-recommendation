@@ -3,10 +3,16 @@ import { api } from "./apiClient";
 
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetchNotifications",
-  async ({ page, limit = 10 }, { rejectWithValue }) => {
+  async ({ page, limit = 10, filter }, { rejectWithValue }) => {
     try {
+      const params = { page, limit };
+
+      if (filter && filter !== "all") {
+        params.filter = filter;
+      }
+
       const response = await api.get("/notifications", {
-        params: { page, limit },
+        params: params, 
       });
       return response.data.data; // { notifications, pagination, unreadCount }
     } catch (error) {
