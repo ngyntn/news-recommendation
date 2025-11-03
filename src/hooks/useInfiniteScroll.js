@@ -14,7 +14,7 @@ export const useInfiniteScroll = ({ listState, fetchThunk, resetAction }) => {
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && hasMore) {
                 if (typeof page === 'number' && !isNaN(page) && page > 0) {
-                    dispatch(fetchThunk({ page, limit: 10 }));
+                    dispatch(fetchThunk({ page, limit: 20 }));
                 } else {
                     console.error("Lỗi Infinite Scroll: Số trang không hợp lệ:", page);
                 }
@@ -34,7 +34,7 @@ export const useInfiniteScroll = ({ listState, fetchThunk, resetAction }) => {
 
     useEffect(() => {
         if (items.length === 0 && !loading && hasMore) {
-             dispatch(fetchThunk({ page: 1, limit: 10 }));
+             dispatch(fetchThunk({ page: 1, limit: 20 }));
         }
     }, [items.length, loading, hasMore, dispatch, fetchThunk]);
 

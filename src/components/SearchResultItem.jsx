@@ -4,6 +4,8 @@ import { Heart } from 'lucide-react';
 import { convertDateTimeToVietnam, convertLikeNumber } from '../utils/convert';
 
 const SearchResultItem = ({ item, author }) => {
+
+    console.log("Rendering SearchResultItem for item:", item);
     const navigate = useNavigate();
     const [likeCount, setLikeCount] = useState(item.likeCount || 0);
     const [userReaction, setUserReaction] = useState(null);

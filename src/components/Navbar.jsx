@@ -39,22 +39,22 @@ function Navbar() {
         <div className="flex-shrink-0">
           <Link to="/" className="flex items-center gap-2">
             <img
-              src="src/assets/logo_dark.png"
+              src="/logo_dark.png"
               alt="Logo Dark"
               className="h-12 w-auto hidden dark:block"
             />
             <img
-              src="src/assets/logo_light.png"
+              src="/logo_light.png"
               alt="Logo Light"
               className="h-12 w-auto dark:hidden"
             />
             <img
-              src="src/assets/name_dark.png"
+              src="/name_dark.png"
               alt="Tên ứng dụng Dark"
               className="h-12 w-auto hidden dark:block"
             />
             <img
-              src="src/assets/name_light.png"
+              src="/name_light.png"
               alt="Tên ứng dụng Light"
               className="h-12 w-auto hidden sm:block dark:hidden"
             />

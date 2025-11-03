@@ -18,7 +18,7 @@ function Home() {
 
     const { items, loading, error, hasMore, lastElementRef } = useInfiniteScroll({
         listState,
-        fetchThunk: fetchRecommendedNews,
+        fetchThunk: fetchRecommendedNewsV2,
         resetAction: resetHomeNews
     });
 

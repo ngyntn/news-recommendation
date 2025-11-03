@@ -3,7 +3,7 @@ import { api } from './apiClient';
    
 export const fetchRecommendedNews = createAsyncThunk(
     'articles/fetchRecommended', 
-    async ({ page, limit = 10 }, { rejectWithValue }) => {
+    async ({ page, limit = 20 }, { rejectWithValue }) => {
         try {
             const response = await api.get('/articles', { params: { page, limit } });
             const resData = response.data.data;
@@ -22,7 +22,7 @@ export const fetchRecommendedNews = createAsyncThunk(
    
 export const fetchRecommendedNewsV2 = createAsyncThunk(
     'articles/fetchRecommendedV2', 
-    async ({ page, limit = 10 }, { rejectWithValue }) => {
+    async ({ page, limit = 20 }, { rejectWithValue }) => {
         try {
             const userId = localStorage.getItem('currentUser') 
                 ? JSON.parse(localStorage.getItem('currentUser')).id
