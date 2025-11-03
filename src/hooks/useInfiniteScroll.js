@@ -17,7 +17,7 @@ export const useInfiniteScroll = ({
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          fetchThunk({ page, limit: 10 });
+          fetchThunk({ page, limit: 20 });
         }
       });
       if (node) observer.current.observe(node);
@@ -33,7 +33,7 @@ export const useInfiniteScroll = ({
 
   useEffect(() => {
     if (items.length === 0 && !loading && hasMore) {
-      fetchThunk({ page: 1, limit: 10 });
+      fetchThunk({ page: 1, limit: 20 });
     }
   }, [items.length, loading, hasMore, fetchThunk, page]);
 

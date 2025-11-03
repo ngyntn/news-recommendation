@@ -21,9 +21,16 @@ function Home() {
   const listState = useSelector(homeStateSelector, shallowEqual);
   const dispatch = useDispatch();
 
+//     const { items, loading, error, hasMore, lastElementRef } = useInfiniteScroll({
+//         listState,
+//         fetchThunk: fetchRecommendedNewsV2,
+//         resetAction: resetHomeNews
+//     });
+
+
   const memoizedFetchThunk = useCallback(
     (params) => {
-      dispatch(fetchRecommendedNews(params));
+      dispatch(fetchRecommendedNewsV2(params));
     },
     [dispatch]
   );
