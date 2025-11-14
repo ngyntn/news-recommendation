@@ -224,3 +224,16 @@ export const fetchRelatedArticlesByTag = createAsyncThunk(
         }
     }
 );
+
+
+export const readArticle = createAsyncThunk(
+    'articles/readArticle',
+    async (articleId, { rejectWithValue }) => {
+        try {
+            const response = await api.post(`/articles/${articleId}/read`);
+            return response.data.data; 
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+)

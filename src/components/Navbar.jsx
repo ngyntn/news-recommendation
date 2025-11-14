@@ -3,41 +3,49 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Home } from "lucide-react";
 import UserMenu from "./UserMenu";
 import NotificationBell from "./NotificationBell";
+import { useDispatch } from "react-redux";
 
 function Navbar() {
-    const [query, setQuery] = useState("");
-    const navigate = useNavigate();
-    const location = useLocation();
-    const params = useParams();
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+  const dispatch = useDispatch();
 
-    const handleSearch = () => {
-        if (query.trim() !== "") {
-            localStorage.setItem('lastSearchQuery', query);
-            navigate(`/search/${query}`);
-        }
-    };
+  const handleSearch = () => {
+    if (query.trim() !== "") {
+      localStorage.setItem('lastSearchQuery', query);
+      navigate(`/search/${query}`);
+    }
+  };
 
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    };
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
-    useEffect(() => {
-        if (location.pathname.startsWith('/search/')) {
-            const lastQuery = localStorage.getItem('lastSearchQuery') || '';
-            setQuery(lastQuery || params.query || '');
-        } else {
-            setQuery('');
-            localStorage.removeItem('lastSearchQuery');
-        }
-    }, [location.pathname]);
+  const handleLogoClick = () => {
+    dispatch(resetHomeNews());
+    setQuery('');
+    localStorage.removeItem('lastSearchQuery');
+  };
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/search/')) {
+      const lastQuery = localStorage.getItem('lastSearchQuery') || '';
+      setQuery(lastQuery || params.query || '');
+    } else {
+      setQuery('');
+      localStorage.removeItem('lastSearchQuery');
+    }
+  }, [location.pathname]);
 
   return (
     <div className="fixed top-0 left-0 w-full bg-white dark:bg-[rgb(24_34_45)] z-50 py-2 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-12">
         <div className="flex-shrink-0">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2" onClick={handleLogoClick}>
             <img
               src="/logo_dark.png"
               alt="Logo Dark"
