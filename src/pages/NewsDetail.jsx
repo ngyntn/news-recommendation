@@ -6,6 +6,7 @@ import {
   fetchDetailNews,
   fetchAuthorArticles,
   fetchRelatedArticlesByTag,
+  readArticle,
 } from "../api/articleApi";
 import LikeInteraction from "../components/LikeInteraction";
 import CommentSection from "../components/CommentSection";
@@ -70,6 +71,12 @@ function NewsDetail() {
       }
     }
   }, [dispatch, item]);
+
+  useEffect(() => {
+    if (item) {
+      dispatch(readArticle(item.id));
+    }
+  }, [item]);
 
   const isAuthor = currentUser && item && currentUser.id === item.author?.id;
 

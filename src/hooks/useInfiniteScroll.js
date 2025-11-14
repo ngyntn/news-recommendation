@@ -25,11 +25,12 @@ export const useInfiniteScroll = ({
     [loading, hasMore, page, fetchThunk]
   );
 
-  useEffect(() => {
-    if (resetAction) {
-      dispatch(resetAction());
-    } 
-  }, [...dependencies, dispatch, resetAction]); 
+  // Tránh bị refresh khi thoát ra từ trang chi tiết
+  // useEffect(() => {
+  //   if (resetAction) {
+  //     dispatch(resetAction());
+  //   } 
+  // }, [...dependencies, dispatch, resetAction]); 
 
   useEffect(() => {
     if (items.length === 0 && !loading && hasMore) {
@@ -37,13 +38,13 @@ export const useInfiniteScroll = ({
     }
   }, [items.length, loading, hasMore, fetchThunk, page]);
 
-  useEffect(() => {
-    return () => {
-      if (resetAction) {
-        dispatch(resetAction());
-      }
-    };
-  }, [dispatch, resetAction]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (resetAction) {
+  //       dispatch(resetAction());
+  //     }
+  //   };
+  // }, [dispatch, resetAction]);
 
   return { items, loading, error, hasMore, lastElementRef };
 };
